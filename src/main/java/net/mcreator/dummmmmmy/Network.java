@@ -1,4 +1,4 @@
-/**
+/*
  * This mod element is always locked. Enter your code in the methods below.
  * If you don't need some of these methods, you can remove them as they
  * are overrides of the base class DummmmmmyModElements.ModElement.
@@ -18,7 +18,6 @@
 */
 package net.mcreator.dummmmmmy;
 
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -28,17 +27,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.MinecraftServer;
+
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.client.Minecraft;
 
 import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
 
 import java.util.function.Supplier;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraft.item.ItemStack;
 import javax.annotation.Nonnull;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -69,12 +65,12 @@ public class Network extends DummmmmmyModElements.ModElement {
 			//Networking.registerMessages();
 	}
 	public static class myMessage {
-	};
+	}
 
 	public static class PacketDamageNumber extends myMessage {
-		private int entityID;
-		private float damage;
-		private float shake;
+		private final int entityID;
+		private final float damage;
+		private final float shake;
 		public PacketDamageNumber(PacketBuffer buf) {
 			this.entityID = buf.readInt();
 			this.damage = buf.readFloat();
@@ -108,9 +104,9 @@ public class Network extends DummmmmmyModElements.ModElement {
 
 
 	public static class PacketSyncEquip extends myMessage {
-		private int entityID;
-		private int slotId;
-		private ItemStack itemstack;
+		private final int entityID;
+		private final int slotId;
+		private final ItemStack itemstack;
 		public PacketSyncEquip(PacketBuffer buf) {
 			this.entityID = buf.readInt();
 		    this.slotId = buf.readInt();
@@ -144,8 +140,8 @@ public class Network extends DummmmmmyModElements.ModElement {
 
 
 	public static class PacketChangeSkin extends myMessage {
-		private int entityID;
-		private boolean skin;
+		private final int entityID;
+		private final boolean skin;
 
 		public PacketChangeSkin(PacketBuffer buf) {
 			this.entityID = buf.readInt();

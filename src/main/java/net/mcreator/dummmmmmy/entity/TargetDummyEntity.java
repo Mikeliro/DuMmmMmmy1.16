@@ -220,7 +220,7 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 
 				if(invchanged){
 					Network.sendToAllTracking(this.world,this, new Network.PacketSyncEquip(this.getEntityId(), equipmentslottype.getIndex(), itemstack));
-					this.applyEquipmentModifiers();
+					//this.applyEquipmentModifiers();
 					return ActionResultType.SUCCESS;
 				}
 
@@ -236,9 +236,9 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			player.setHeldItem(hand, itemstack2);
 			this.setItemStackToSlot(slot, stack);
 
-			this.applyEquipmentModifiers();
+			//this.applyEquipmentModifiers();
 			//now done here^
-			//this.getAttributes().removeAttributeModifiers(itemstack2.getAttributeModifiers(slot));
+			this.getAttributeManager().removeModifiers(itemstack2.getAttributeModifiers(slot));
 			//clear mob type
 			if(slot==EquipmentSlotType.HEAD)this.mobType=0;
 			
@@ -264,9 +264,9 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.playEquipSound(itemstack2);
 			this.setItemStackToSlot(slot, itemstack2);
 			
-			this.applyEquipmentModifiers();
+			//this.applyEquipmentModifiers();
 			//now done here^
-			//this.getAttributes().applyAttributeModifiers(itemstack2.getAttributeModifiers(slot));
+			this.getAttributeManager().reapplyModifiers(itemstack2.getAttributeModifiers(slot));
 			//add mob type
 			if(this.isUndeadSkull(itemstack2)){ 
 				this.mobType=1;
@@ -793,11 +793,6 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.newhead2.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size);
 			this.newhead2.setRotationPoint(0.0F, -24.0F + yOffsetIn, 0.0F);
 			this.newhead.addChild(this.newhead2);
-			
-			this.bipedHeadwear = new ModelRenderer(this, 32, 0);
-			this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, size + 0.5F);
-			this.bipedHeadwear.setRotationPoint(0.0F, -24.0F + yOffsetIn, 0.0F);
-			this.newhead.addChild(this.bipedHeadwear);
 		}
 		
 		@Override
@@ -848,13 +843,6 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 		@Override
 		public void setRotationAngles(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
 				float headPitch) {
-			// this.bipedHead.rotateAngleY = netHeadYaw / (180F / (float) Math.PI);
-			// this.bipedHead.rotateAngleX = headPitch / (180F / (float) Math.PI);
-			//this.newhead.rotateAngleY = netHeadYaw / (180F / (float) Math.PI);
-			//this.newhead.rotateAngleX = headPitch / (180F / (float) Math.PI);
-
-			this.bipedHeadwear.rotateAngleY = this.bipedHead.rotateAngleY;
-			this.bipedHeadwear.rotateAngleX = this.bipedHead.rotateAngleX;
 			this.bipedRightArm.rotateAngleZ = 0.0F;
 			this.bipedLeftArm.rotateAngleZ = 0.0F;
 			this.bipedLeftArm.rotateAngleX = 0;
@@ -863,7 +851,6 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.bipedLeftArm.rotateAngleY = 0.0F;
 			this.bipedBody.rotateAngleX = 0.0F;
 			this.bipedHead.rotationPointY = 0.0F;
-			this.bipedHeadwear.rotationPointY = 0.0F;
 			// un-rotate the stand plate so it's aligned to the block grid
 			this.standPlate.rotateAngleY = -(entityIn).rotationYaw / (180F / (float) Math.PI);
 			this.bipedRightArm.rotateAngleZ = (float) Math.PI / 2f;
@@ -894,9 +881,6 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.newhead2.rotateAngleZ = r2; //r2
 			// this.newhead.setRotationPoint(0F, 24.0F + 0, 0.0F);
 			this.newhead.rotateAngleX = r / 2;
-			// add
-			this.bipedHeadwear.rotateAngleX = -r;
-			this.bipedHeadwear.rotateAngleZ = r2;
 		}
 	}
 
@@ -914,7 +898,6 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 				case HEAD :
 					modelIn.bipedHead.showModel = true;
 					((ModelDummy) modelIn).newhead.showModel = true;
-					modelIn.bipedHeadwear.showModel = true;
 					break;
 				case CHEST :
 					modelIn.bipedBody.showModel = true;

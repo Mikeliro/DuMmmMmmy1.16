@@ -1,18 +1,24 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[34,)"
 license="All rights reserved"
 [[mods]]
-modId="dummmmmmy"
-version="1.0.0"
-displayName="DuMmmMmmy"
-credits="MCreator, Bonusboni, Gooigipunch"
-displayURL=""
-logoFile="logo.png"
-authors="MehVahdJukaar,  bonusboni"
-description='''
-Don't hurt me
-'''
+    modId="dummmmmmy"
+    version="1.0.0"
+    displayName="MmmMmmMmmMmm"
+    credits="MCreator, bonusboni, Gooigipunch"
+    displayURL=""
+    logoFile="icon.png"
+    authors="MehVahdJukaar,  bonusboni"
+    description='''
+    don't hurt me pls
+    '''
 
+[[dependencies.dummmmmmy]]
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[34,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
 [[dependencies.dummmmmmy]]
     modId="minecraft"
     mandatory=true
