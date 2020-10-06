@@ -219,7 +219,7 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 
 
 				if(invchanged){
-					Network.sendToAllTracking(this.world,this, new Network.PacketSyncEquip(this.getEntityId(), equipmentslottype.getIndex(), itemstack));
+					Network.sendToAllTracking(this.world,this, new Network.PacketSyncEquip(this.getEntityId(), equipmentslottype.getIndex(), this.getItemStackFromSlot(equipmentslottype)));
 					//this.applyEquipmentModifiers();
 					return ActionResultType.SUCCESS;
 				}
@@ -794,12 +794,16 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.newhead2.setRotationPoint(0.0F, -24.0F + yOffsetIn, 0.0F);
 			this.newhead.addChild(this.newhead2);
 		}
-		
+
 		@Override
 		public ModelRenderer getModelHead() {
+			return this.getModelHeadWithOffset(-0.99f);
+		}
+
+		public ModelRenderer getModelHeadWithOffset(float offset){
 			// head parameters
 			double hx = -4f;
-			double hy = -8f;
+			double hy = -8f ;
 			double hz = -4f;
 			double hs = 8f;
 			double hrx = 0f;
@@ -807,10 +811,10 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			double hrz = 0f;
 			// can't find a bette solution for skull heads... hardcoding it is
 			// same parameters and rotation as newhead2. hopefully won't get called often
-			Vector3d v = new Vector3d(hx, hy + hry, hz).rotatePitch(-r / 2).add(0, -hry - 0.99, 0);
-			Vector3d v2 = new Vector3d(hrx, hry, hrz).rotatePitch(-r / 2).add(0, -hry - 0.99, 0);
+			Vector3d v = new Vector3d(hx, hy + hry, hz).rotatePitch(-r / 2).add(0, -hry +offset, 0);
+			Vector3d v2 = new Vector3d(hrx, hry, hrz).rotatePitch(-r / 2).add(0, -hry +offset, 0);
 			ModelRenderer skullhead = new ModelRenderer(this, 0, 0);
-			skullhead.addBox((float) v.getX(), (float) v.getY(), (float) v.getZ(), 8f, 8f, 8f, 1f);
+			skullhead.addBox((float) v.getX(), (float) v.getY(), (float) v.getZ(), (float)hs, (float)hs, (float)hs, 1f);
 			skullhead.setRotationPoint((float) v2.getX(), (float) v2.getY(), (float) v2.getZ());
 			skullhead.rotateAngleX = -r + r / 2;
 			skullhead.rotateAngleZ = r2;
@@ -827,6 +831,7 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 
 			this.standPlate.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			matrixStackIn.translate(0, -0.0625, 0);
+			this.bipedHead.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			this.newhead.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			this.bipedLeftLeg.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			this.bipedBody.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
@@ -866,7 +871,7 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 				r = (float) -(MathHelper.sin(phase) * Math.PI / 100f * shake);
 				r2 = (float) (MathHelper.sin(phase) * Math.PI / 20f);
 				//r3 = (float) -(MathHelper.sin(phase/2) * Math.PI / 100f * shake);
-	
+
 			}
 			float n = 1.5f;
 			this.bipedLeftArm.rotateAngleX = r * n;
@@ -881,6 +886,10 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			this.newhead2.rotateAngleZ = r2; //r2
 			// this.newhead.setRotationPoint(0F, 24.0F + 0, 0.0F);
 			this.newhead.rotateAngleX = r / 2;
+
+			//I'm using this for the armor head cause for some reason in 1.16 I can't get it to animate at all
+			this.bipedHead=this.getModelHeadWithOffset(0);
+			this.bipedHead.showModel=false;
 		}
 	}
 
@@ -890,32 +899,31 @@ public class TargetDummyEntity extends DummmmmmyModElements.ModElement {
 			super(p_i50936_1_, new ModelDummy(0.5F, 0, 64, 32, -0.01f), new ModelDummy(1.0F, 0, 64, 32, -0.01f));
 		}
 
+
+
 		@Override
 		protected void setModelSlotVisible(BipedModel<LivingEntity> modelIn, EquipmentSlotType slotIn) {
-			super.setModelSlotVisible(modelIn,slotIn);
+			modelIn.setVisible(false);
 			((ModelDummy) modelIn).standPlate.showModel = false;
+			((ModelDummy) modelIn).newhead.showModel = false;
 			switch (slotIn) {
 				case HEAD :
 					modelIn.bipedHead.showModel = true;
-					((ModelDummy) modelIn).newhead.showModel = true;
 					break;
 				case CHEST :
 					modelIn.bipedBody.showModel = true;
 					modelIn.bipedRightArm.showModel = true;
 					modelIn.bipedLeftArm.showModel = true;
-					((ModelDummy) modelIn).newhead.showModel = false;
 					break;
 				case LEGS :
 					modelIn.bipedBody.showModel = true;
 					modelIn.bipedRightLeg.showModel = true;
 					modelIn.bipedLeftLeg.showModel = true;
-					((ModelDummy) modelIn).newhead.showModel = false;
 					break;
 				case FEET :
 					modelIn.bipedRightLeg.showModel = false;
 					modelIn.bipedLeftLeg.showModel = true;
 					modelIn.bipedBody.showModel = false;
-					((ModelDummy) modelIn).newhead.showModel = false;
 			}
 		}
 	}
