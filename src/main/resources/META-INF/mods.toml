@@ -1,16 +1,16 @@
 modLoader="javafml"
 loaderVersion="[34,)"
-license="All rights reserved"
+license="don't know what to put here :/"
 [[mods]]
     modId="dummmmmmy"
     version="1.0.0"
     displayName="MmmMmmMmmMmm"
-    credits="MCreator, bonusboni, Gooigipunch"
+    credits="bonusboni, Gooigipunch, MCreator"
     displayURL=""
     logoFile="icon.png"
     authors="MehVahdJukaar,  bonusboni"
     description='''
-    don't hurt me pls
+    don't hurt me pls :S
     '''
 
 [[dependencies.dummmmmmy]]

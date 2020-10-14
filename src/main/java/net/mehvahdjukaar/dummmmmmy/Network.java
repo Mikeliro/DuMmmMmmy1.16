@@ -16,7 +16,7 @@
  * If you change workspace package, modid or prefix, you will need
  * to manually adapt this file to these changes or remake it.
 */
-package net.mcreator.dummmmmmy;
+package net.mehvahdjukaar.dummmmmmy;
 
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -32,7 +32,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.client.Minecraft;
 
-import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 
 import java.util.function.Supplier;
 import net.minecraft.item.ItemStack;

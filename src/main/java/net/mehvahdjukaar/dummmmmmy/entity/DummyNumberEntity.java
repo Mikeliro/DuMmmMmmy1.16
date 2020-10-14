@@ -1,6 +1,8 @@
 
-package net.mcreator.dummmmmmy.entity;
+package net.mehvahdjukaar.dummmmmmy.entity;
 
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -31,9 +33,9 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.block.BlockState;
 
-import net.mcreator.dummmmmmy.DummmmmmyModElements;
+import net.mehvahdjukaar.dummmmmmy.DummmmmmyModElements;
 
-import net.mcreator.dummmmmmy.Config;
+import net.mehvahdjukaar.dummmmmmy.Config;
 
 import java.util.Random;
 
@@ -45,27 +47,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-@DummmmmmyModElements.ModElement.Tag
-public class DummyNumberEntity extends DummmmmmyModElements.ModElement {
-	public static EntityType entity = null;
+public class DummyNumberEntity{
+	public static EntityType DUMMY_NUMBER = (EntityType.Builder.<CustomEntity>create(CustomEntity::new, EntityClassification.MONSTER).setShouldReceiveVelocityUpdates(true)
+			.setTrackingRange(64).setUpdateInterval(3).setCustomClientFactory(CustomEntity::new).size(0.6f, 1.8f)).build("dummy_number")
+			.setRegistryName("dummy_number");
 	public DummyNumberEntity(DummmmmmyModElements instance) {
-		super(instance, 5);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
 
-	@Override
-	public void initElements() {
-		entity = (EntityType.Builder.<CustomEntity>create(CustomEntity::new, EntityClassification.MONSTER).setShouldReceiveVelocityUpdates(true)
-				.setTrackingRange(64).setUpdateInterval(3).setCustomClientFactory(CustomEntity::new).size(0.6f, 1.8f)).build("dummy_number")
-						.setRegistryName("dummy_number");
-		elements.entities.add(() -> entity);
-	}
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public void init(FMLCommonSetupEvent event) {
-		RenderingRegistry.registerEntityRenderingHandler(entity, renderManager -> new CustomRender(renderManager));
-	}
+
 	public static class CustomEntity extends Entity implements IEntityAdditionalSpawnData {
 		protected static final int MAXAGE=40;
 		public int age;
@@ -82,7 +73,7 @@ public class DummyNumberEntity extends DummmmmmyModElements.ModElement {
 		protected final Random rand = new Random();
 		public  List<Float> list = new ArrayList<>(Arrays.asList(0f,-0.25f,0.12f,-0.12f,0.25f));
 		public CustomEntity(FMLPlayMessages.SpawnEntity packet, World world) {
-			this(entity, world);
+			this(DUMMY_NUMBER, world);
 		}
 
 		public CustomEntity(EntityType<CustomEntity> type, World world) {
@@ -90,7 +81,7 @@ public class DummyNumberEntity extends DummmmmmyModElements.ModElement {
 		}
 
 		public CustomEntity(float number, int color, World world) {
-			super(entity, world);
+			super(DUMMY_NUMBER, world);
 			this.number = number;
 			this.color = color;
 		}
@@ -213,58 +204,6 @@ public class DummyNumberEntity extends DummmmmmyModElements.ModElement {
 		@Override
 		public void setNoGravity(boolean ignored) {
 			super.setNoGravity(true);
-		}
-	}
-
-	public static class CustomRender extends EntityRenderer<CustomEntity> {
-		private static final DecimalFormat df = new DecimalFormat("#.##");
-		public CustomRender(EntityRendererManager renderManager) {
-			super(renderManager);
-		}
-
-		@Override
-		public void render(CustomEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
-				int packedLightIn) {
-			FontRenderer fontrenderer = this.renderManager.getFontRenderer();
-			matrixStackIn.push();
-			// translate towards player
-			PlayerEntity player = Minecraft.getInstance().player;
-
-
-			Vector3d v = (player.getPositionVec().subtract(entityIn.getPositionVec())).normalize();
-			matrixStackIn.translate(v.getX(), v.getY(), v.getZ());
-			// animation
-			matrixStackIn.translate(0, MathHelper.lerp(partialTicks, entityIn.prevDy, entityIn.dy), 0);
-			// rotate towards camera
-			double d = Math.sqrt(this.renderManager.getDistanceToCamera(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ()));
-			
-
-			float fadeout =entityIn.fadeout;
-			
-			float defscale = 0.006f;
-			float scale = (float) (defscale * d);
-			matrixStackIn.rotate(this.renderManager.getCameraOrientation());
-			// matrixStackIn.translate(0, 0, -1);
-			// animation
-			matrixStackIn.translate(MathHelper.lerp(partialTicks, entityIn.prevDx, entityIn.dx),0, 0);
-			// scale depending on distance so size remains the same
-			matrixStackIn.scale(-scale, -scale, scale);
-			matrixStackIn.translate(0, (4d*(1-fadeout)) , 0);
-			matrixStackIn.scale(fadeout, fadeout, fadeout);
-			matrixStackIn.translate(0,  -d / 10d, 0);
-
-			float number = Config.Configs.SHOW_HEARTHS.get()? entityIn.getNumber()/2f : entityIn.getNumber();
-			String s = df.format(number);
-			// center string
-			matrixStackIn.translate((-fontrenderer.getStringWidth(s) / 2f) + 0.5f, 0, 0);
-			fontrenderer.renderString(s, 0, 0, entityIn.color, true, matrixStackIn.getLast().getMatrix(), bufferIn, false, 0, packedLightIn);
-			// matrixStackIn.translate(fontrenderer.getStringWidth(s) / 2, 0, 0);
-			matrixStackIn.pop();
-		}
-
-		@Override
-		public ResourceLocation getEntityTexture(CustomEntity entity) {
-			return null;
 		}
 	}
 }

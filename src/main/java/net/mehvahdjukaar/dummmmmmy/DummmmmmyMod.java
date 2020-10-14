@@ -15,10 +15,19 @@
  *    will be REGENERATED on each build.
  *
  */
-package net.mcreator.dummmmmmy;
+package net.mehvahdjukaar.dummmmmmy;
 
-import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.minecraftforge.fml.network.NetworkRegistry;
+import net.mehvahdjukaar.dummmmmmy.client.LayerDummyArmor;
+import net.mehvahdjukaar.dummmmmmy.client.NumberRenderer;
+import net.mehvahdjukaar.dummmmmmy.client.TargetDummyRenderer;
+import net.mehvahdjukaar.dummmmmmy.entity.DummyNumberEntity;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
+import net.minecraft.client.renderer.entity.BipedRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -30,20 +39,15 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.api.distmarker.Dist;
 
-import net.minecraft.world.biome.Biome;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.entity.EntityType;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.block.Block;
 
 import java.util.function.Supplier;
 
 @Mod("dummmmmmy")
 public class DummmmmmyMod {
-	private static final String PROTOCOL_VERSION = "1";
-	public static final SimpleChannel PACKET_HANDLER = NetworkRegistry.newSimpleChannel(new ResourceLocation("dummmmmmy", "dummmmmmy"),
-			() -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+
 	public DummmmmmyModElements elements;
 	public DummmmmmyMod() {
 		elements = new DummmmmmyModElements();
@@ -53,8 +57,11 @@ public class DummmmmmyMod {
 	}
 
 	private void init(FMLCommonSetupEvent event) {
-		elements.getElements().forEach(element -> element.init(event));
+		GlobalEntityTypeAttributes.put(TargetDummyEntity.TARGET_DUMMY, TargetDummyEntity.CustomEntity.setCustomAttributes().create());
+		//TODO: add this for dummy nmumber to prevent trowing errors at launch
 	}
+
+
 
 	//this causes the game to crash on launch for some reason. not using it anyways
 	//@SubscribeEvent
@@ -69,32 +76,36 @@ public class DummmmmmyMod {
 	}
 
 	@SubscribeEvent
-	public void registerBlocks(RegistryEvent.Register<Block> event) {
-		event.getRegistry().registerAll(elements.getBlocks().stream().map(Supplier::get).toArray(Block[]::new));
+	@OnlyIn(Dist.CLIENT)
+	public void registerModels(ModelRegistryEvent event) {
+		RenderingRegistry.registerEntityRenderingHandler(TargetDummyEntity.TARGET_DUMMY, renderManager -> {
+			BipedRenderer customRender = new BipedRenderer(renderManager, new TargetDummyRenderer(), 0f) {
+				@Override
+				public ResourceLocation getEntityTexture(Entity entity) {
+					return new ResourceLocation(Config.Configs.getSkin(entity));
+				}
+			};
+			customRender.addLayer(new LayerDummyArmor(customRender, new BipedModel(0.5f), new BipedModel(1)));
+			return customRender;
+		});
+
+		RenderingRegistry.registerEntityRenderingHandler(DummyNumberEntity.DUMMY_NUMBER, renderManager -> new NumberRenderer(renderManager));
+
 	}
+
+
 
 	@SubscribeEvent
 	public void registerItems(RegistryEvent.Register<Item> event) {
 		event.getRegistry().registerAll(elements.getItems().stream().map(Supplier::get).toArray(Item[]::new));
 	}
 
-	@SubscribeEvent
-	public void registerBiomes(RegistryEvent.Register<Biome> event) {
-		event.getRegistry().registerAll(elements.getBiomes().stream().map(Supplier::get).toArray(Biome[]::new));
-	}
 
 	@SubscribeEvent
 	public void registerEntities(RegistryEvent.Register<EntityType<?>> event) {
-		event.getRegistry().registerAll(elements.getEntities().stream().map(Supplier::get).toArray(EntityType[]::new));
+		//event.getRegistry().registerAll(elements.getEntities().stream().map(Supplier::get).toArray(EntityType[]::new));
+		event.getRegistry().register(TargetDummyEntity.TARGET_DUMMY);
+		event.getRegistry().register(DummyNumberEntity.DUMMY_NUMBER);
 	}
 
-	@SubscribeEvent
-	public void registerEnchantments(RegistryEvent.Register<Enchantment> event) {
-		event.getRegistry().registerAll(elements.getEnchantments().stream().map(Supplier::get).toArray(Enchantment[]::new));
-	}
-
-	@SubscribeEvent
-	public void registerSounds(RegistryEvent.Register<net.minecraft.util.SoundEvent> event) {
-		elements.registerSounds(event);
-	}
 }

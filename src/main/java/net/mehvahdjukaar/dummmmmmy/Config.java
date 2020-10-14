@@ -16,17 +16,16 @@
  * If you change workspace package, modid or prefix, you will need
  * to manually adapt this file to these changes or remake it.
 */
-package net.mcreator.dummmmmmy;
+package net.mehvahdjukaar.dummmmmmy;
 
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraft.entity.Entity;
-import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 
 
 

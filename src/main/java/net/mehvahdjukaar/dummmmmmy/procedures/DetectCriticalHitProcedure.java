@@ -1,15 +1,12 @@
-package net.mcreator.dummmmmmy.procedures;
+package net.mehvahdjukaar.dummmmmmy.procedures;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 
 import net.minecraft.entity.Entity;
 
-import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
-import net.mcreator.dummmmmmy.DummmmmmyModElements;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import net.minecraft.server.MinecraftServer;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
+import net.mehvahdjukaar.dummmmmmy.DummmmmmyModElements;
 import net.minecraftforge.common.MinecraftForge;
 
 @DummmmmmyModElements.ModElement.Tag

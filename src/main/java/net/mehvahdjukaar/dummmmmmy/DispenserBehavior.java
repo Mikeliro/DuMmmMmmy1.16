@@ -16,7 +16,7 @@
  * If you change workspace package, modid or prefix, you will need
  * to manually adapt this file to these changes or remake it.
 */
-package net.mcreator.dummmmmmy;
+package net.mehvahdjukaar.dummmmmmy;
 
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -24,23 +24,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.dispenser.IDispenseItemBehavior;
 import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraft.block.Block;
 import net.minecraft.util.Direction;
-import net.minecraft.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.HoeItem;
-import net.minecraft.world.server.ServerWorld;
 
-import net.mcreator.dummmmmmy.item.TargetDummyPlacerItem;
+import net.mehvahdjukaar.dummmmmmy.item.TargetDummyPlacerItem;
 
-import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 
 @DummmmmmyModElements.ModElement.Tag
 public class DispenserBehavior extends DummmmmmyModElements.ModElement {

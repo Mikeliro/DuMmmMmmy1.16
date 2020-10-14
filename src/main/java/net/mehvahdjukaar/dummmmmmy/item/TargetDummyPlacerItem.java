@@ -1,5 +1,5 @@
 
-package net.mcreator.dummmmmmy.item;
+package net.mehvahdjukaar.dummmmmmy.item;
 
 import net.minecraftforge.registries.ObjectHolder;
 
@@ -21,8 +21,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.block.BlockState;
 
-import net.mcreator.dummmmmmy.entity.TargetDummyEntity;
-import net.mcreator.dummmmmmy.DummmmmmyModElements;
+import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
+import net.mehvahdjukaar.dummmmmmy.DummmmmmyModElements;
 
 
 import java.util.List;
