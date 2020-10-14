@@ -1,90 +1,55 @@
 
 package net.mehvahdjukaar.dummmmmmy.entity;
 
+import net.mehvahdjukaar.dummmmmmy.Config;
+import net.mehvahdjukaar.dummmmmmy.Network;
+import net.mehvahdjukaar.dummmmmmy.item.TargetDummyItem;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.CreatureAttribute;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.fml.network.NetworkHooks;
-import net.minecraftforge.fml.network.FMLPlayMessages;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.api.distmarker.Dist;
-
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.IPacket;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.item.ItemStack;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
-import net.minecraft.client.renderer.entity.IEntityRenderer;
-import net.minecraft.client.renderer.entity.BipedRenderer;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BlockState;
-
-import net.mehvahdjukaar.dummmmmmy.Config;
-import net.mehvahdjukaar.dummmmmmy.item.TargetDummyPlacerItem;
-import net.mehvahdjukaar.dummmmmmy.Network;
-import net.mehvahdjukaar.dummmmmmy.DummmmmmyModElements;
-
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import java.text.DecimalFormat;
-import net.minecraft.item.Item;
 import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.item.Items;
-import net.minecraft.item.BannerItem;
-import net.minecraft.world.raid.Raid;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
-import net.minecraft.item.ShearsItem;
+import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
+import net.minecraft.world.raid.Raid;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.FMLPlayMessages;
+import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class TargetDummyEntity{
-	public static EntityType TARGET_DUMMY = (EntityType.Builder.<CustomEntity>create(CustomEntity::new, EntityClassification.MISC).setShouldReceiveVelocityUpdates(true)
-			.setTrackingRange(64).setUpdateInterval(3).setCustomClientFactory(CustomEntity::new).size(0.6f, 2f)).build("target_dummy")
-			.setRegistryName("target_dummy");;
-	public TargetDummyEntity(DummmmmmyModElements instance) {
-		FMLJavaModLoadingContext.get().getModEventBus().register(this);
-	}
+	public static EntityType TARGET_DUMMY = (EntityType.Builder.<DummyMob>create(DummyMob::new, EntityClassification.MISC).setShouldReceiveVelocityUpdates(true)
+			.setTrackingRange(64).setUpdateInterval(3).setCustomClientFactory(DummyMob::new).size(0.6f, 2f)).build("target_dummy")
+			.setRegistryName("target_dummy");
 
 
 
-
-	public static class CustomEntity extends MobEntity implements IEntityAdditionalSpawnData {
+	public static class DummyMob extends MobEntity implements IEntityAdditionalSpawnData {
 
 
 		public float shake;
@@ -105,11 +70,11 @@ public class TargetDummyEntity{
 		//public DummyNumberEntity.CustomEntity myLittleNumber;
 		private final NonNullList<ItemStack> inventoryArmor = NonNullList.withSize(4, ItemStack.EMPTY);
 
-		public CustomEntity(FMLPlayMessages.SpawnEntity packet, World world) {
+		public DummyMob(FMLPlayMessages.SpawnEntity packet, World world) {
 			this(TARGET_DUMMY, world);
 		}
 
-		public CustomEntity(EntityType<CustomEntity> type, World world) {
+		public DummyMob(EntityType<DummyMob> type, World world) {
 			super(type, world);
 			experienceValue = 0;
 			setNoAI(true);
@@ -118,7 +83,7 @@ public class TargetDummyEntity{
 	
 		}
 
-		public CustomEntity(World world) {
+		public DummyMob(World world) {
 			this(TARGET_DUMMY, world);
 		}
 
@@ -309,7 +274,7 @@ public class TargetDummyEntity{
 			if (!getEntityWorld().isRemote) {
 				if (drops) {
 					dropInventory();
-					this.entityDropItem(TargetDummyPlacerItem.block, 1);
+					this.entityDropItem(TargetDummyItem.DUMMY_ITEM, 1);
 				}
 				this.playBrokenSound();
 				this.playParticles();
@@ -472,7 +437,7 @@ public class TargetDummyEntity{
 				
 				// damage numebrssss
 				int color = getColorFromDamageSource(source);
-				DummyNumberEntity.CustomEntity number = new DummyNumberEntity.CustomEntity(damage, color, this.mynumberpos++, this.world);
+				DummyNumberEntity.NumberEntity number = new DummyNumberEntity.NumberEntity(damage, color, this.mynumberpos++, this.world);
 				number.setLocationAndAngles(this.getPosX(), this.getPosY()+1, this.getPosZ(), 0.0F, 0.0F);
 				this.world.addEntity(number);
 

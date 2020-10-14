@@ -1,71 +1,28 @@
-/*
- * This mod element is always locked. Enter your code in the methods below.
- * If you don't need some of these methods, you can remove them as they
- * are overrides of the base class DummmmmmyModElements.ModElement.
- *
- * You can register new events in this class too.
- *
- * As this class is loaded into mod element list, it NEEDS to extend
- * ModElement class. If you remove this extend statement or remove the
- * constructor, the compilation will fail.
- *
- * If you want to make a plain independent class, create it using
- * Project Browser - New... and make sure to make the class
- * outside net.mcreator.dummmmmmy as this package is managed by MCreator.
- *
- * If you change workspace package, modid or prefix, you will need
- * to manually adapt this file to these changes or remake it.
-*/
+
 package net.mehvahdjukaar.dummmmmmy;
 
-import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-
-
-import net.minecraft.util.ResourceLocation;
-
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.entity.Entity;
-import net.minecraft.client.Minecraft;
-
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-
-import java.util.function.Supplier;
-import net.minecraft.item.ItemStack;
-import javax.annotation.Nonnull;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
-@DummmmmmyModElements.ModElement.Tag
-public class Network extends DummmmmmyModElements.ModElement {
-	/**
-	 * Do not remove this constructor
-	 */
-	public Network(DummmmmmyModElements instance) {
-		super(instance, 2);
-	}
+import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
-	@Override
-	public void initElements() {
-			//Networking.registerMessages();
-	}
+public class Network {
 
-	@Override
-	public void init(FMLCommonSetupEvent event) {
-		Networking.registerMessages();
-	}
 
-	@Override
-	public void serverLoad(FMLServerStartingEvent event) {
-			//Networking.registerMessages();
-	}
-	public static class myMessage {
-	}
+
+	public static class myMessage {}
 
 	public static class PacketDamageNumber extends myMessage {
 		private final int entityID;
@@ -92,8 +49,8 @@ public class Network extends DummmmmmyModElements.ModElement {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.CustomEntity) {
-					TargetDummyEntity.CustomEntity dummy = (TargetDummyEntity.CustomEntity) entity;
+				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
+					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
 					dummy.setShake(this.shake);
 				}
 			});
@@ -129,8 +86,8 @@ public class Network extends DummmmmmyModElements.ModElement {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.CustomEntity) {
-					TargetDummyEntity.CustomEntity dummy = (TargetDummyEntity.CustomEntity) entity;
+				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
+					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
 					dummy.setItemStackToSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, this.slotId), this.itemstack);
 				}
 			});
@@ -161,8 +118,8 @@ public class Network extends DummmmmmyModElements.ModElement {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.CustomEntity) {
-					TargetDummyEntity.CustomEntity dummy = (TargetDummyEntity.CustomEntity) entity;
+				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
+					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
 					dummy.sheared=this.skin;
 				}
 			});

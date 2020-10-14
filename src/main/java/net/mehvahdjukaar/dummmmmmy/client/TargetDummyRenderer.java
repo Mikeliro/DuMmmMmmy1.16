@@ -131,8 +131,8 @@ public class TargetDummyRenderer extends BipedModel<LivingEntity> {
         this.bipedRightArm.rotateAngleZ = (float) Math.PI / 2f;
         this.bipedLeftArm.rotateAngleZ = -(float) Math.PI / 2f;
 
-        float phase = ((TargetDummyEntity.CustomEntity) entityIn).shakeAnimation;
-        float shake = Math.min((float) (((TargetDummyEntity.CustomEntity) entityIn).shake * Config.Configs.ANIMATION_INTENSITY.get()), 40f);
+        float phase = ((TargetDummyEntity.DummyMob) entityIn).shakeAnimation;
+        float shake = Math.min((float) (((TargetDummyEntity.DummyMob) entityIn).shake * Config.Configs.ANIMATION_INTENSITY.get()), 40f);
         this.r = 0;
         this.r2 = 0;
         //float r3=0;

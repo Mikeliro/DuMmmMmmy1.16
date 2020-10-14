@@ -6,7 +6,6 @@ import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraft.entity.Entity;
 
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.mehvahdjukaar.dummmmmmy.DummmmmmyModElements;
 import net.minecraftforge.common.MinecraftForge;
 
 @DummmmmmyModElements.ModElement.Tag
@@ -20,8 +19,8 @@ public class DetectCriticalHitProcedure extends DummmmmmyModElements.ModElement 
 	public void onEntityCriticalHit(CriticalHitEvent event) {
 		if (event != null && event.getEntity() != null) {
 			Entity target = event.getTarget();
-			if (event.getDamageModifier() == 1.5 && target instanceof TargetDummyEntity.CustomEntity) {
-				TargetDummyEntity.CustomEntity dummy = (TargetDummyEntity.CustomEntity) target;
+			if (event.getDamageModifier() == 1.5 && target instanceof TargetDummyEntity.DummyMob) {
+				TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) target;
 
 				dummy.hitByCritical();
 			}

@@ -15,14 +15,14 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import java.text.DecimalFormat;
 
-public class NumberRenderer extends EntityRenderer<DummyNumberEntity.CustomEntity> {
+public class NumberRenderer extends EntityRenderer<DummyNumberEntity.NumberEntity> {
     private static final DecimalFormat df = new DecimalFormat("#.##");
     public NumberRenderer(EntityRendererManager renderManager) {
         super(renderManager);
     }
 
     @Override
-    public void render(DummyNumberEntity.CustomEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
+    public void render(DummyNumberEntity.NumberEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
                        int packedLightIn) {
         FontRenderer fontrenderer = this.renderManager.getFontRenderer();
         matrixStackIn.push();
@@ -62,7 +62,7 @@ public class NumberRenderer extends EntityRenderer<DummyNumberEntity.CustomEntit
     }
 
     @Override
-    public ResourceLocation getEntityTexture(DummyNumberEntity.CustomEntity entity) {
+    public ResourceLocation getEntityTexture(DummyNumberEntity.NumberEntity entity) {
         return null;
     }
 }

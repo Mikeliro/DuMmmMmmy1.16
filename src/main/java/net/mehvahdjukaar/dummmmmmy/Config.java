@@ -1,58 +1,12 @@
-/**
- * This mod element is always locked. Enter your code in the methods below.
- * If you don't need some of these methods, you can remove them as they
- * are overrides of the base class DummmmmmyModElements.ModElement.
- *
- * You can register new events in this class too.
- *
- * As this class is loaded into mod element list, it NEEDS to extend
- * ModElement class. If you remove this extend statement or remove the
- * constructor, the compilation will fail.
- *
- * If you want to make a plain independent class, create it using
- * Project Browser - New... and make sure to make the class
- * outside net.mcreator.dummmmmmy as this package is managed by MCreator.
- *
- * If you change workspace package, modid or prefix, you will need
- * to manually adapt this file to these changes or remake it.
-*/
+
 package net.mehvahdjukaar.dummmmmmy;
 
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraft.entity.Entity;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
+import net.minecraft.entity.Entity;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-
-
-@DummmmmmyModElements.ModElement.Tag
-public class Config extends DummmmmmyModElements.ModElement {
-	/**
-	 * Do not remove this constructor
-	 */
-	public Config(DummmmmmyModElements instance) {
-		super(instance, 9);
-	}
-
-	@Override
-	public void initElements() {
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Configs.CLIENT_CONFIG);
-	}
-
-	@Override
-	public void init(FMLCommonSetupEvent event) {
-	
-	
-	}
-
-	@Override
-	public void serverLoad(FMLServerStartingEvent event) {
-	}
-
+public class Config {
 
 	@EventBusSubscriber
 	public  static class Configs{
@@ -74,16 +28,14 @@ public class Config extends DummmmmmyModElements.ModElement {
 	        SKIN = CLIENT_BUILDER.comment("possible skins: 0 = default, 1 = original, 2 = my attempt").defineInRange("texture", 0, 0, 2);
 	        
 	        CLIENT_BUILDER.pop();
-	
-
 
 	        CLIENT_CONFIG = CLIENT_BUILDER.build();
     	}
 
 		public static String getSkin(Entity entity){
 			boolean flag = false;
-			if(entity instanceof TargetDummyEntity.CustomEntity){
-				flag = ((TargetDummyEntity.CustomEntity)entity).sheared;
+			if(entity instanceof TargetDummyEntity.DummyMob){
+				flag = ((TargetDummyEntity.DummyMob)entity).sheared;
 			}
 			if(!flag){
 				switch (SKIN.get()){
@@ -108,9 +60,6 @@ public class Config extends DummmmmmyModElements.ModElement {
 				}
 			}
 		}
-		
 	}
 
-
-	
 }
