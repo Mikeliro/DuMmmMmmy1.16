@@ -36,7 +36,7 @@ public class DummmmmmyMod {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
-
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.Configs.CLIENT_CONFIG);
 		//don't know what I'm doing here :/
 		new DetectCriticalHit();
 		//MinecraftForge.EVENT_BUS.register(DetectCriticalHit.class);
@@ -47,7 +47,6 @@ public class DummmmmmyMod {
 		GlobalEntityTypeAttributes.put(DummyNumberEntity.DUMMY_NUMBER, DummyNumberEntity.NumberEntity.setCustomAttributes().create());
 		DispenserBehavior.registerBehaviors();
 		Network.Networking.registerMessages();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.Configs.CLIENT_CONFIG);
 	}
 
 
