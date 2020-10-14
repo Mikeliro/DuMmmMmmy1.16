@@ -36,11 +36,15 @@ public class DummmmmmyMod {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
+
+		//don't know what I'm doing here :/
+		new DetectCriticalHit();
+		//MinecraftForge.EVENT_BUS.register(DetectCriticalHit.class);
 	}
 
 	private void init(FMLCommonSetupEvent event) {
 		GlobalEntityTypeAttributes.put(TargetDummyEntity.TARGET_DUMMY, TargetDummyEntity.DummyMob.setCustomAttributes().create());
-		//TODO: add this for dummy nmumber to prevent trowing errors at launch
+		GlobalEntityTypeAttributes.put(DummyNumberEntity.DUMMY_NUMBER, DummyNumberEntity.NumberEntity.setCustomAttributes().create());
 		DispenserBehavior.registerBehaviors();
 		Network.Networking.registerMessages();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.Configs.CLIENT_CONFIG);
@@ -64,6 +68,8 @@ public class DummmmmmyMod {
 		RenderingRegistry.registerEntityRenderingHandler(DummyNumberEntity.DUMMY_NUMBER, renderManager -> new NumberRenderer(renderManager));
 
 	}
+
+
 
 	@SubscribeEvent
 	public void registerItems(RegistryEvent.Register<Item> event) {
