@@ -555,14 +555,6 @@ public class TargetDummyEntity{
 			return true;
 		}
 
-		// used for arrows. may want to change this, but then again 
-		// armor stands are alive so...
-		//can cause problems with wither
-		@Override
-		public boolean isAlive() {
-			return true;
-		}
-
 		@Override
 		public boolean canBePushed() {
 			return false;
