@@ -1,28 +1,26 @@
 modLoader="javafml"
-loaderVersion="[34,)"
+loaderVersion="[31,)"
 license="don't know what to put here :/"
 [[mods]]
     modId="dummmmmmy"
-    version="1.0.0"
+    version="1.0.1"
     displayName="MmmMmmMmmMmm"
     credits="bonusboni, Gooigipunch, MCreator"
     displayURL="https://www.curseforge.com/minecraft/mc-mods/mmmmmmmmmmmm"
     logoFile="logo.png"
     authors="MehVahdJukaar,  bonusboni"
-    description='''
-    don't hurt me pls :S
-    '''
+    description='''don't hurt me pls :S'''
 
 [[dependencies.dummmmmmy]]
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[34,)" #mandatory
+    versionRange="[32,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.dummmmmmy]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.3]"
+    versionRange="[1.16,1.17]"
     ordering="NONE"
     side="BOTH"
 

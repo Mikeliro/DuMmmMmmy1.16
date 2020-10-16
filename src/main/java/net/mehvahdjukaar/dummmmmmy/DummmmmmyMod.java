@@ -1,10 +1,9 @@
 
 //Authors: bonusboni, mehvahdjukaar
 package net.mehvahdjukaar.dummmmmmy;
-
 import net.mehvahdjukaar.dummmmmmy.client.LayerDummyArmor;
-import net.mehvahdjukaar.dummmmmmy.client.NumberRenderer;
-import net.mehvahdjukaar.dummmmmmy.client.TargetDummyRenderer;
+import net.mehvahdjukaar.dummmmmmy.client.NumberModel;
+import net.mehvahdjukaar.dummmmmmy.client.TargetDummyModel;
 import net.mehvahdjukaar.dummmmmmy.dispenser.DispenserBehavior;
 import net.mehvahdjukaar.dummmmmmy.entity.DummyNumberEntity;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
@@ -14,6 +13,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -54,17 +54,20 @@ public class DummmmmmyMod {
 	@OnlyIn(Dist.CLIENT)
 	public void registerModels(ModelRegistryEvent event) {
 		RenderingRegistry.registerEntityRenderingHandler(TargetDummyEntity.TARGET_DUMMY, renderManager -> {
-			BipedRenderer customRender = new BipedRenderer(renderManager, new TargetDummyRenderer(), 0f) {
+			BipedRenderer customRender = new BipedRenderer(renderManager, new TargetDummyModel(), 0f) {
 				@Override
 				public ResourceLocation getEntityTexture(Entity entity) {
 					return new ResourceLocation(Config.Configs.getSkin(entity));
 				}
 			};
-			customRender.addLayer(new LayerDummyArmor(customRender, new BipedModel(0.5f), new BipedModel(1)));
+			//customRender.addLayer(new LayerDummyArmor(customRender, new TargetDummyModel(0.5F, 0, 64, 32, -0.01f), new TargetDummyModel(1.0F, 0, 64, 32, -0.01f)));
+			customRender.addLayer(new LayerDummyArmor(customRender, new TargetDummyModel(EquipmentSlotType.LEGS), new TargetDummyModel(EquipmentSlotType.CHEST)));
+
+			//customRender.addLayer(new LayerDummyArmor(customRender, new BipedModel(0.5f), new BipedModel(1)));
 			return customRender;
 		});
 
-		RenderingRegistry.registerEntityRenderingHandler(DummyNumberEntity.DUMMY_NUMBER, renderManager -> new NumberRenderer(renderManager));
+		RenderingRegistry.registerEntityRenderingHandler(DummyNumberEntity.DUMMY_NUMBER, renderManager -> new NumberModel(renderManager));
 
 	}
 

@@ -15,9 +15,9 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import java.text.DecimalFormat;
 
-public class NumberRenderer extends EntityRenderer<DummyNumberEntity.NumberEntity> {
+public class NumberModel extends EntityRenderer<DummyNumberEntity.NumberEntity> {
     private static final DecimalFormat df = new DecimalFormat("#.##");
-    public NumberRenderer(EntityRendererManager renderManager) {
+    public NumberModel(EntityRendererManager renderManager) {
         super(renderManager);
     }
 
