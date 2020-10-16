@@ -29,6 +29,7 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         if(this instanceof  TargetDummyModel){
             ((TargetDummyModel) this).standPlate.showModel = false;
         }
+        this.bipedRightLeg.showModel = false;
     }
     //normal model constructor. had to make two cause it was causing crashed with mods.
     public TargetDummyModel() {
@@ -58,6 +59,11 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         this.bipedHead = new ModelRenderer(this, 0, 0);
         this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size);
         this.bipedHead.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
+
+        //mod support. I'm not using this
+        this.bipedHeadwear = new ModelRenderer(this, 32, 0);
+        this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size + 0.5F);
+        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
 
         this.bipedLeftLeg = new ModelRenderer(this, 0, 16);
         this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, size+legOffset);
@@ -160,6 +166,9 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
 
         this.bipedLeftLeg.setRotationPoint(0, 12.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedLeftLeg, 0, 24 + yOffsetIn, 0, xangle);
+        //for mod support
+        this.bipedRightLeg.setRotationPoint(0, 12.0F + yOffsetIn, 0.0F);
+        this.rotateModelX(this.bipedRightLeg, 0.01f, 24 + yOffsetIn+0.01f, 0.01f, xangle);
 
         this.bipedBody.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedBody, 0, 24 + yOffsetIn, 0, xangle);
@@ -172,6 +181,8 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
 
         this.bipedHead.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedHead, 0, 24 + yOffsetIn, 0, xangle);
+        //mod support
+        this.bipedHeadwear.copyModelAngles(this.bipedHead);
 
         this.bipedRightArm.rotateAngleX = r * n;
         this.bipedLeftArm.rotateAngleX = r * n;

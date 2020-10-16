@@ -24,7 +24,7 @@ public class LayerDummyArmor<T extends LivingEntity, M extends BipedModel<T>, A 
     protected void setModelSlotVisible(A modelIn, EquipmentSlotType slotIn) {
         modelIn.setVisible(false);
         boolean flag = modelIn instanceof  TargetDummyModel;
-
+        modelIn.bipedRightLeg.showModel = false;
         switch (slotIn) {
             case HEAD:
                 modelIn.bipedHead.showModel = true;
