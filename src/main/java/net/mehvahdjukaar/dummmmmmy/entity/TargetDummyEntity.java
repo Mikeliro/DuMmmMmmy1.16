@@ -534,7 +534,8 @@ public class TargetDummyEntity{
 					float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
 					float dps = damageTaken / seconds;
 					for (ServerPlayerEntity p : this.currentlyAttacking) {
-						p.sendStatusMessage(new StringTextComponent("Target Dummy: " + new DecimalFormat("#.##").format(dps)+" DPS"), true);
+						if(p.getDistance(this)<64)
+							p.sendStatusMessage(new StringTextComponent("Target Dummy: " + new DecimalFormat("#.##").format(dps)+" DPS"), true);
 				
 					}
 					

@@ -31,7 +31,7 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         }
         this.bipedRightLeg.showModel = false;
     }
-    //normal model constructor. had to make two cause it was causing crashed with mods.
+    //normal model constructor. had to make two cause it was causing crashes with mods.
     public TargetDummyModel() {
         super(0,0,64,64);
         this.constructor(0);
@@ -129,6 +129,7 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         this.bipedBody.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
         this.bipedLeftLeg.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 
+        this.bipedHeadwear.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
         matrixStackIn.pop();
     }
 
