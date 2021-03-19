@@ -3,16 +3,15 @@ package net.mehvahdjukaar.dummmmmmy.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.mehvahdjukaar.dummmmmmy.Config;
+import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
-public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
+public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T> {
     public ModelRenderer standPlate;
 
     private float r = 0;
@@ -26,9 +25,7 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         float size = 1;
         if(slot == EquipmentSlotType.LEGS) size = 0.5f;
         constructor(size);
-        if(this instanceof  TargetDummyModel){
-            ((TargetDummyModel) this).standPlate.showModel = false;
-        }
+        this.standPlate.showModel = false;
         this.bipedRightLeg.showModel = false;
     }
     //normal model constructor. had to make two cause it was causing crashes with mods.
@@ -115,6 +112,15 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         model.setRotationPoint((float) newrot.getX(), (float) newrot.getY(), (float) newrot.getZ());
         model.rotateAngleX = angle;
     }
+    public void rotateModelY(ModelRenderer model, float nrx, float nry, float nrz, float angle, int mult){
+        Vector3d oldrot = new Vector3d(model.rotationPointX, model.rotationPointY, model.rotationPointZ);
+        Vector3d actualrot = new Vector3d(nrx, nry, nrz);
+
+        Vector3d newrot = actualrot.add(oldrot.subtract(actualrot).rotatePitch(-angle));
+
+        model.setRotationPoint((float) newrot.getX(), (float) newrot.getY(), (float) newrot.getZ());
+        model.rotateAngleY = angle*mult;
+    }
 
     @Override
     public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green,
@@ -133,30 +139,34 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         matrixStackIn.pop();
     }
 
+    //TODO: this is horrible
+    @Override
+    public void setLivingAnimations(T entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
+        super.setLivingAnimations(entityIn, limbSwing, limbSwingAmount, partialTick);
+        float phase = MathHelper.lerp(partialTick,entityIn.prevShakeAmount,entityIn.shakeAmount);
+        float swing = MathHelper.lerp(partialTick,entityIn.prevLimbswing,entityIn.limbSwing);
+        float shake = Math.min((float) (swing * Configs.cached.ANIMATION_INTENSITY), 40f);
+
+        if (shake > 0) {
+            this.r = (float) -(MathHelper.sin(phase) * Math.PI / 100f * shake);
+            this.r2 = (float) (MathHelper.sin(phase) * Math.PI / 20f * Math.min(shake,1));
+        }
+        else{
+            this.r = 0;
+            this.r2 = 0;
+        }
+
+    }
 
     @Override
-    public void setRotationAngles(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
+    public void setRotationAngles(TargetDummyEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
                                   float headPitch) {
 
 
         // un-rotate the stand plate so it's aligned to the block grid
         this.standPlate.rotateAngleY = -(entityIn).rotationYaw / (180F / (float) Math.PI);
 
-        //rotate arms
-        this.bipedRightArm.rotateAngleZ = (float) Math.PI / 2f;
-        this.bipedLeftArm.rotateAngleZ = -(float) Math.PI / 2f;
 
-        float phase = ((TargetDummyEntity.DummyMob) entityIn).shakeAnimation;
-        float shake = Math.min((float) (((TargetDummyEntity.DummyMob) entityIn).shake * Config.Configs.ANIMATION_INTENSITY.get()), 40f);
-
-        if (shake > 0) {
-            r = (float) -(MathHelper.sin(phase) * Math.PI / 100f * shake);
-            r2 = (float) (MathHelper.sin(phase) * Math.PI / 20f);
-        }
-        else{
-            r = 0;
-            r2 = 0;
-        }
         float n = 1.5f;
 
         //------new---------
@@ -164,6 +174,7 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         float yOffsetIn = -1;
 
         float xangle = r/2;
+
 
         this.bipedLeftLeg.setRotationPoint(0, 12.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedLeftLeg, 0, 24 + yOffsetIn, 0, xangle);
@@ -174,22 +185,34 @@ public class TargetDummyModel<T extends LivingEntity> extends BipedModel<T> {
         this.bipedBody.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedBody, 0, 24 + yOffsetIn, 0, xangle);
 
+
         this.bipedRightArm.setRotationPoint(-2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.rotateModelX(this.bipedRightArm, 0, 24 + yOffsetIn, 0, xangle);
+        this.rotateModelY(this.bipedRightArm, 0, 24 + yOffsetIn, 0, xangle, -1);
 
         this.bipedLeftArm.setRotationPoint(2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.rotateModelX(this.bipedLeftArm, 0, 24 + yOffsetIn, 0, xangle);
+        this.rotateModelY(this.bipedLeftArm, 0, 24 + yOffsetIn, 0, xangle, 1);
+
+
 
         this.bipedHead.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.bipedHead, 0, 24 + yOffsetIn, 0, xangle);
         //mod support
         this.bipedHeadwear.copyModelAngles(this.bipedHead);
 
-        this.bipedRightArm.rotateAngleX = r * n;
-        this.bipedLeftArm.rotateAngleX = r * n;
+
 
         this.bipedHead.rotateAngleX = -r; //-r
         this.bipedHead.rotateAngleZ = r2; //r2
 
+
+        //rotate arms up
+        this.bipedRightArm.rotateAngleZ = (float) Math.PI / 2f;
+        this.bipedLeftArm.rotateAngleZ = -(float) Math.PI / 2f;
+        //swing arm
+        this.bipedRightArm.rotateAngleX = r * n;
+        this.bipedLeftArm.rotateAngleX = r * n;
+
     }
+
+
 }

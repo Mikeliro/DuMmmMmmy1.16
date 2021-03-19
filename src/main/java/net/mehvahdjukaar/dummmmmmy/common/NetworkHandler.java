@@ -1,6 +1,7 @@
 
-package net.mehvahdjukaar.dummmmmmy;
+package net.mehvahdjukaar.dummmmmmy.common;
 
+import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -8,7 +9,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -18,13 +18,38 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class Network {
+public class NetworkHandler {
+	public static SimpleChannel INSTANCE;
+	private static int ID = 0;
+	private static final String PROTOCOL_VERSION = "1";
+	public static int nextID() {
+		return ID++;
+	}
 
 
+	public static void registerMessages() {
+		INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(DummmmmmyMod.MOD_ID, "dummychannel"), () -> PROTOCOL_VERSION,
+				PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
-	public static class myMessage {}
+		INSTANCE.registerMessage(nextID(), PacketDamageNumber.class, PacketDamageNumber::toBytes, PacketDamageNumber::new,
+				PacketDamageNumber::handle);
 
-	public static class PacketDamageNumber extends myMessage {
+		INSTANCE.registerMessage(nextID(), PacketSyncEquip.class, PacketSyncEquip::toBytes, PacketSyncEquip::new,
+				PacketSyncEquip::handle);
+
+
+		INSTANCE.registerMessage(nextID(), PacketChangeSkin.class, PacketChangeSkin::toBytes, PacketChangeSkin::new,
+				PacketChangeSkin::handle);
+
+	}
+
+
+	private interface Message{}
+	public static void sendToAllTracking(Entity entity, ServerWorld world, Message message) {
+		world.getChunkProvider().sendToAllTracking(entity, INSTANCE.toVanillaPacket(message, NetworkDirection.PLAY_TO_CLIENT));
+	}
+
+	public static class PacketDamageNumber implements Message{
 		private final int entityID;
 		private final float damage;
 		private final float shake;
@@ -49,9 +74,9 @@ public class Network {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
-					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
-					dummy.setShake(this.shake);
+				if (entity instanceof TargetDummyEntity) {
+					TargetDummyEntity dummy = (TargetDummyEntity) entity;
+					dummy.limbSwing = shake;
 				}
 			});
 			ctx.get().setPacketHandled(true);
@@ -59,8 +84,7 @@ public class Network {
 	}
 
 
-
-	public static class PacketSyncEquip extends myMessage {
+	public static class PacketSyncEquip implements Message{
 		private final int entityID;
 		private final int slotId;
 		private final ItemStack itemstack;
@@ -86,8 +110,8 @@ public class Network {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
-					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
+				if (entity instanceof TargetDummyEntity) {
+					TargetDummyEntity dummy = (TargetDummyEntity) entity;
 					dummy.setItemStackToSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, this.slotId), this.itemstack);
 				}
 			});
@@ -96,7 +120,7 @@ public class Network {
 	}
 
 
-	public static class PacketChangeSkin extends myMessage {
+	public static class PacketChangeSkin implements Message{
 		private final int entityID;
 		private final boolean skin;
 
@@ -118,8 +142,8 @@ public class Network {
 		public void handle(Supplier<NetworkEvent.Context> ctx) {
 			ctx.get().enqueueWork(() -> {
 				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity != null && entity instanceof TargetDummyEntity.DummyMob) {
-					TargetDummyEntity.DummyMob dummy = (TargetDummyEntity.DummyMob) entity;
+				if (entity instanceof TargetDummyEntity) {
+					TargetDummyEntity dummy = (TargetDummyEntity) entity;
 					dummy.sheared=this.skin;
 				}
 			});
@@ -127,39 +151,5 @@ public class Network {
 		}
 	}
 
-
-
-
-
-	public static class Networking {
-		public static SimpleChannel INSTANCE;
-		private static int ID = 0;
-		public static int nextID() {
-			return ID++;
-		}
-
-		public static void registerMessages() {
-			INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation("dummmmmmy:mychannel"), () -> "1.0", s -> true, s -> true);
-			
-			INSTANCE.registerMessage(nextID(), PacketDamageNumber.class, PacketDamageNumber::toBytes, PacketDamageNumber::new,
-					PacketDamageNumber::handle);
-
-
-			INSTANCE.registerMessage(nextID(), PacketSyncEquip.class, PacketSyncEquip::toBytes, PacketSyncEquip::new,
-					PacketSyncEquip::handle);
-
-			
-			INSTANCE.registerMessage(nextID(), PacketChangeSkin.class, PacketChangeSkin::toBytes, PacketChangeSkin::new,
-					PacketChangeSkin::handle);
-
-		}
-	}
-
-	public static void sendToAllTracking(World world, Entity entityIn, myMessage message){
-		if (world instanceof ServerWorld){
-		((ServerWorld)world).getChunkProvider().sendToAllTracking(entityIn, Networking.INSTANCE.toVanillaPacket(message, NetworkDirection.PLAY_TO_CLIENT));
-		}
-
-	}
 	
 }

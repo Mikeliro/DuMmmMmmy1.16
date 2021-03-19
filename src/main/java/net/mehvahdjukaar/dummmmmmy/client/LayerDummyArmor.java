@@ -11,10 +11,10 @@ public class LayerDummyArmor<T extends LivingEntity, M extends BipedModel<T>, A 
                            BipedModel<LivingEntity> p_i50936_3_) {
         super(p_i50936_1_, new TargetDummyRenderer(0.5F, 0, 64, 32, -0.01f), new TargetDummyRenderer(1.0F, 0, 64, 32, -0.01f));
     }*/
-    public LayerDummyArmor(IEntityRenderer<T, M> p_i50936_1_, A p_i50936_2_, A p_i50936_3_) {
+    public LayerDummyArmor(IEntityRenderer<T, M> renderer, A modelLegs, A modelChest) {
 
         //super(p_i50936_1_, (A) new TargetDummyModel<T>(0.5F, 0, 64, 32, -0.01f), (A) new TargetDummyModel<T>(1.0F, 0, 64, 32, -0.01f));
-        super(p_i50936_1_,p_i50936_2_,p_i50936_3_);
+        super(renderer,modelLegs,modelChest);
 
     }
 
@@ -22,7 +22,7 @@ public class LayerDummyArmor<T extends LivingEntity, M extends BipedModel<T>, A 
     @Override
     protected void setModelSlotVisible(A modelIn, EquipmentSlotType slotIn) {
         modelIn.setVisible(false);
-        boolean flag = modelIn instanceof  TargetDummyModel;
+        //boolean flag = modelIn instanceof  TargetDummyModel;
         modelIn.bipedRightLeg.showModel = false;
         switch (slotIn) {
             case HEAD:
@@ -35,11 +35,9 @@ public class LayerDummyArmor<T extends LivingEntity, M extends BipedModel<T>, A 
                 break;
             case LEGS:
                 modelIn.bipedBody.showModel = true;
-                modelIn.bipedRightLeg.showModel = false;
                 modelIn.bipedLeftLeg.showModel = true;
                 break;
             case FEET:
-                modelIn.bipedRightLeg.showModel = false;
                 modelIn.bipedLeftLeg.showModel = true;
                 modelIn.bipedBody.showModel = false;
         }

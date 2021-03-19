@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.dummmmmmy.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.mehvahdjukaar.dummmmmmy.Config;
+import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.entity.DummyNumberEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -15,14 +15,14 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import java.text.DecimalFormat;
 
-public class NumberModel extends EntityRenderer<DummyNumberEntity.NumberEntity> {
+public class NumberRenderer extends EntityRenderer<DummyNumberEntity> {
     private static final DecimalFormat df = new DecimalFormat("#.##");
-    public NumberModel(EntityRendererManager renderManager) {
+    public NumberRenderer(EntityRendererManager renderManager) {
         super(renderManager);
     }
 
     @Override
-    public void render(DummyNumberEntity.NumberEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
+    public void render(DummyNumberEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
                        int packedLightIn) {
         FontRenderer fontrenderer = this.renderManager.getFontRenderer();
         matrixStackIn.push();
@@ -30,15 +30,17 @@ public class NumberModel extends EntityRenderer<DummyNumberEntity.NumberEntity> 
         PlayerEntity player = Minecraft.getInstance().player;
 
 
-        Vector3d v = (player.getPositionVec().subtract(entityIn.getPositionVec())).normalize();
-        matrixStackIn.translate(v.getX(), v.getY(), v.getZ());
+        //Vector3d v = (player.getPositionVec().subtract(entityIn.getPositionVec())).normalize();
+       // matrixStackIn.translate(v.getX(), v.getY(), v.getZ());
+
+
         // animation
         matrixStackIn.translate(0, MathHelper.lerp(partialTicks, entityIn.prevDy, entityIn.dy), 0);
         // rotate towards camera
         double d = Math.sqrt(this.renderManager.getDistanceToCamera(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ()));
 
 
-        float fadeout =entityIn.fadeout;
+        float fadeout = MathHelper.lerp(partialTicks, entityIn.prevFadeout, entityIn.fadeout);
 
         float defscale = 0.006f;
         float scale = (float) (defscale * d);
@@ -52,7 +54,7 @@ public class NumberModel extends EntityRenderer<DummyNumberEntity.NumberEntity> 
         matrixStackIn.scale(fadeout, fadeout, fadeout);
         matrixStackIn.translate(0,  -d / 10d, 0);
 
-        float number = Config.Configs.SHOW_HEARTHS.get()? entityIn.getNumber()/2f : entityIn.getNumber();
+        float number = Configs.cached.SHOW_HEARTHS? entityIn.getNumber()/2f : entityIn.getNumber();
         String s = df.format(number);
         // center string
         matrixStackIn.translate((-fontrenderer.getStringWidth(s) / 2f) + 0.5f, 0, 0);
@@ -62,7 +64,7 @@ public class NumberModel extends EntityRenderer<DummyNumberEntity.NumberEntity> 
     }
 
     @Override
-    public ResourceLocation getEntityTexture(DummyNumberEntity.NumberEntity entity) {
+    public ResourceLocation getEntityTexture(DummyNumberEntity entity) {
         return null;
     }
 }
