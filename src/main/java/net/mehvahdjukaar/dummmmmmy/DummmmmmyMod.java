@@ -3,12 +3,10 @@
 package net.mehvahdjukaar.dummmmmmy;
 
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
-import net.mehvahdjukaar.dummmmmmy.common.DetectCriticalHit;
 import net.mehvahdjukaar.dummmmmmy.setup.ClientSetup;
 import net.mehvahdjukaar.dummmmmmy.setup.ModSetup;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;

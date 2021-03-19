@@ -1,19 +1,16 @@
 
 package net.mehvahdjukaar.dummmmmmy.entity;
 
-import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.common.NetworkHandler;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -31,7 +28,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.FMLPlayMessages;
@@ -73,7 +69,8 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 	public TargetDummyEntity(EntityType<TargetDummyEntity> type, World world) {
 		super(type, world);
 		experienceValue = 0;
-		setNoAI(true);
+		//so can take all sorts of damage
+		//setNoAI(true);
 		Arrays.fill(this.inventoryArmorDropChances, 1.1f);
 
 	}
@@ -87,6 +84,39 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 
+	//stuff needed by client only?
+	//called when entity is first spawned/loaded
+	@Override
+	public void writeSpawnData(PacketBuffer buffer) {
+		buffer.writeBoolean(this.sheared);
+		//hijacking this method to do some other server calculations. there's probably an event just for this but I haven't found it
+		this.updateOnLoadServer();
+
+	}
+
+	//called when entity is first spawned/loaded
+	@Override
+	public void readSpawnData(PacketBuffer additionalData) {
+		this.sheared = additionalData.readBoolean();
+		//and this as well to do some other client calculations
+		this.updateOnLoadClient();
+	}
+
+	@Override
+	public void writeAdditional(CompoundNBT tag) {
+		super.writeAdditional(tag);
+		tag.putInt("Type", this.mobType.ordinal());
+		tag.putInt("NumberPos", this.mynumberpos);
+		tag.putBoolean("Sheared", this.sheared);
+	}
+
+	@Override
+	public void readAdditional(CompoundNBT tag) {
+		super.readAdditional(tag);
+		this.mobType = MobAttribute.values()[tag.getInt("Type")];
+		this.mynumberpos = tag.getInt("NumberPos");
+		this.sheared = tag.getBoolean("Sheared");
+	}
 
 	public void updateOnLoadClient() {
 		float r = this.rotationYaw;
@@ -100,13 +130,21 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 	}
 
 	// dress it up! :D
-
 	@Override
 	public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
 		boolean invchanged = false;
 		if (!player.isSpectator() && player.abilities.allowEdit) {
 			ItemStack itemstack = player.getHeldItem(hand);
 			EquipmentSlotType equipmentslottype = getSlotForItemStack(itemstack);
+
+			Item item = itemstack.getItem();
+
+			//special items
+			if(item instanceof BannerItem || this.isPumpkin(item)){
+				equipmentslottype = EquipmentSlotType.HEAD;
+			}
+
+
 			// empty hand -> unequip
 			if (itemstack.isEmpty() && hand == Hand.MAIN_HAND) {
 				equipmentslottype = this.getClickedSlot(vec);
@@ -117,15 +155,6 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
 				}
 			}
-			//equip banner
-			else if (itemstack.getItem() instanceof BannerItem) {
-				if(player.world.isRemote)return ActionResultType.CONSUME;
-				equipmentslottype = EquipmentSlotType.HEAD;
-				this.equipArmor(player, equipmentslottype, itemstack, hand);
-				invchanged = true;
-
-
-			}
 			// armor item in hand -> equip/swap
 			else if (equipmentslottype.getSlotType() == EquipmentSlotType.Group.ARMOR) {
 				if(player.world.isRemote)return ActionResultType.CONSUME;
@@ -134,7 +163,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
 			}
 			//remove sack
-			else if (itemstack.getItem() instanceof ShearsItem) {
+			else if (item instanceof ShearsItem) {
 				if (!this.sheared) {
 					if(player.world.isRemote)return ActionResultType.CONSUME;
 					this.sheared = true;
@@ -144,8 +173,6 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 					}
 					return ActionResultType.SUCCESS;
 				}
-
-
 			}
 
 
@@ -193,25 +220,28 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 		this.getAttributeManager().reapplyModifiers(newItem.getAttributeModifiers(slot));
 		if(slot==EquipmentSlotType.HEAD) {
 			//add mob type
-			if (this.isUndeadSkull(newItem)) {
-				this.mobType = MobAttribute.UNDEAD;
-			} else if (newItem.getItem() == Items.TURTLE_HELMET) {
-				this.mobType = MobAttribute.WATER;
-			} else if (newItem.getItem() == Items.DRAGON_HEAD) {
-				this.mobType = MobAttribute.ARTHROPOD;
-			} else if (ItemStack.areItemStacksEqual(newItem, Raid.createIllagerBanner())) {
-				this.mobType = MobAttribute.ILLAGER;
-			} else this.mobType = MobAttribute.UNDEFINED;
+			if (this.isUndeadSkull(newItem)) this.mobType = MobAttribute.UNDEAD;
+			else if (newItem.getItem() == Items.TURTLE_HELMET) this.mobType = MobAttribute.WATER;
+			else if (newItem.getItem() == Items.DRAGON_HEAD) this.mobType = MobAttribute.ARTHROPOD;
+			else if (ItemStack.areItemStacksEqual(newItem, Raid.createIllagerBanner())) this.mobType = MobAttribute.ILLAGER;
+			else if (this.isPumpkin(newItem.getItem())) this.mobType = MobAttribute.SCARECROW;
+			else this.mobType = MobAttribute.UNDEFINED;
 		}
 	}
 
-
+	private boolean isPumpkin(Item item){
+		return item instanceof BlockItem && ((BlockItem) item).getBlock() instanceof CarvedPumpkinBlock;
+	}
 
 	private boolean isUndeadSkull(ItemStack itemstack){
 		Item i =itemstack.getItem();
 		return i == Items.WITHER_SKELETON_SKULL ||
 				i == Items.SKELETON_SKULL ||
 				i == Items.ZOMBIE_HEAD;
+	}
+
+	public boolean isScarecrow(){
+		return this.mobType==MobAttribute.SCARECROW;
 	}
 
 	private EquipmentSlotType getClickedSlot(Vector3d p_190772_1_) {
@@ -230,18 +260,34 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 		return equipmentslottype;
 	}
 
-	private void playBrokenSound() {
-		this.world.playSound(null, this.getPosX(), this.getPosY(), this.getPosZ(), SoundEvents.ENTITY_ARMOR_STAND_BREAK,
-				this.getSoundCategory(), 1.0F, 1.0F);
-	}
+	public void applyEquipmentModifiers() {
+		//living entity code here. apparently every entity does this check every tick.
+		//trying instead to run it only when needed instead
+		if (!this.world.isRemote) {
+			for (EquipmentSlotType equipmentslottype : EquipmentSlotType.values()) {
+				ItemStack itemstack;
+				if (equipmentslottype.getSlotType()== EquipmentSlotType.Group.ARMOR) {
+					itemstack = this.inventoryArmor.get(equipmentslottype.getIndex());
 
-	private void playParticles() {
-		if (this.world instanceof ServerWorld) {
-			((ServerWorld) getEntityWorld()).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.getDefaultState()),
-					this.getPosX(), this.getPosYHeight(0.6666666666666666D), this.getPosZ(), 10,  (this.getWidth() / 4.0F),
-					 (this.getHeight() / 4.0F),  (this.getWidth() / 4.0F), 0.05D);
+					ItemStack itemstack1 = this.getItemStackFromSlot(equipmentslottype);
+					if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
+						if (!itemstack1.equals(itemstack, true))
+							//send packet
+							//Network.sendToAllTracking(this.world,this, new Network.PacketSyncEquip(this.getEntityId(), equipmentslottype.getIndex(), itemstack));
+
+							net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent(this, equipmentslottype, itemstack, itemstack1));
+						if (!itemstack.isEmpty()) {
+							this.getAttributeManager().removeModifiers(itemstack.getAttributeModifiers(equipmentslottype));
+						}
+						if (!itemstack1.isEmpty()) {
+							this.getAttributeManager().reapplyModifiers(itemstack1.getAttributeModifiers(equipmentslottype));
+						}
+					}
+				}
+			}
 		}
 	}
+
 
 	public void dropInventory() {
 		for (EquipmentSlotType slot : EquipmentSlotType.values()) {
@@ -256,26 +302,24 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 	}
 
 	public void dismantle(boolean drops) {
-		if (!getEntityWorld().isRemote) {
+		if (!this.world.isRemote) {
 			if (drops) {
-				dropInventory();
+				this.dropInventory();
 				this.entityDropItem(Registry.DUMMY_ITEM.get(), 1);
 			}
-			this.playBrokenSound();
-			this.playParticles();
-		}
-		this.remove();
-	}
+			this.world.playSound(null, this.getPosX(), this.getPosY(), this.getPosZ(), this.getDeathSound(),
+					this.getSoundCategory(), 1.0F, 1.0F);
 
+			((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.getDefaultState()),
+					this.getPosX(), this.getPosYHeight(0.6666666666666666D), this.getPosZ(), 10,  (this.getWidth() / 4.0F),
+					(this.getHeight() / 4.0F),  (this.getWidth() / 4.0F), 0.05D);
+			this.remove();
+		}
+	}
 
 	@Override
 	public void onKillCommand() {
 	  this.dismantle(true);
-	}
-
-	@Override
-	public boolean canBreatheUnderwater() {
-	  return true;
 	}
 
 	public int getColorFromDamageSource(DamageSource source){
@@ -434,49 +478,55 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 	}
 
 
-	public void applyEquipmentModifiers() {
-		//living entity code here. apparently every entity does this check every tick.
-		//trying instead to run it only when needed instead
-		if (!this.world.isRemote) {
-			for (EquipmentSlotType equipmentslottype : EquipmentSlotType.values()) {
-				ItemStack itemstack;
-				if (equipmentslottype.getSlotType()== EquipmentSlotType.Group.ARMOR) {
-					itemstack = this.inventoryArmor.get(equipmentslottype.getIndex());
-
-					ItemStack itemstack1 = this.getItemStackFromSlot(equipmentslottype);
-					if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
-						if (!itemstack1.equals(itemstack, true))
-							//send packet
-							//Network.sendToAllTracking(this.world,this, new Network.PacketSyncEquip(this.getEntityId(), equipmentslottype.getIndex(), itemstack));
-
-							net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent(this, equipmentslottype, itemstack, itemstack1));
-						if (!itemstack.isEmpty()) {
-							this.getAttributeManager().removeModifiers(itemstack.getAttributeModifiers(equipmentslottype));
-						}
-						if (!itemstack1.isEmpty()) {
-							this.getAttributeManager().reapplyModifiers(itemstack1.getAttributeModifiers(equipmentslottype));
-						}
-					}
-				}
-			}
-		}
-	}
-
 	@Override
 	public void tick() {
 
+		BlockPos onPos = this.getOnPosition();
+
 		//check if on stable ground. used for automation
-		if (this.world != null && this.world.getGameTime() % 20L == 0L) {
-			if (world.isAirBlock(this.getOnPosition())) {
+		if (this.world != null && this.world.getGameTime() % 20L == 0L && !this.world.isRemote) {
+			if (world.isAirBlock(onPos)) {
 				this.dismantle(true);
+				return;
 			}
 		}
+
+		this.setNoGravity(true);
+		this.world.getBlockState(onPos).getBlock().onEntityWalk(this.world,onPos,this);
 
 
 		//used for fire damage, poison damage etc.
 		//so you can damage it like any mob
-		//for some reason instant damage 2 arrows show their damage twice
+
 		this.baseTick();
+
+
+		//living tick stuff. dont remove
+		Vector3d vector3d = this.getMotion();
+		double d1 = vector3d.x;
+		double d3 = vector3d.y;
+		double d5 = vector3d.z;
+		if (Math.abs(vector3d.x) < 0.003D) {
+			d1 = 0.0D;
+		}
+		if (Math.abs(vector3d.y) < 0.003D) {
+			d3 = 0.0D;
+		}
+		if (Math.abs(vector3d.z) < 0.003D) {
+			d5 = 0.0D;
+		}
+
+		this.setMotion(d1, d3, d5);
+
+		this.world.getProfiler().startSection("travel");
+		this.travel(new Vector3d(this.moveStrafing, this.moveVertical, this.moveForward));
+		this.world.getProfiler().endSection();
+
+
+		this.world.getProfiler().startSection("push");
+		this.collideWithNearbyEntities();
+		this.world.getProfiler().endSection();
+		//end living tick stuff
 
 
 
@@ -493,48 +543,58 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 				if (this.limbSwing <= 0) {
 					this.shakeAmount = 0;
 					this.limbSwing = 0;
-
 				}
 			}
-			//used only for dragon head mouth
-			//this.prevLimbSwingAmount = this.limbSwingAmount;
-			//this.limbSwingAmount = shakeAmount;
-
 
 		}
-		else if(this.damageTaken > 0){
-			// DPS!
-			//&& this.ticksExisted - lastDamageTick >60 for static
+		else {
+			this.setFlag(6, this.isGlowing());
+			if (!this.glowing) {
+				boolean flag = this.isPotionActive(Effects.GLOWING);
+				if (this.getFlag(6) != flag) {
+					this.setFlag(6, flag);
+				}
+			}
 
-			//am i being attacked?
+			if(this.damageTaken > 0){
+				// DPS!
+				//&& this.ticksExisted - lastDamageTick >60 for static
 
-			boolean isdynamic = Configs.cached.DYNAMIC_DPS;
-			boolean flag = isdynamic? (this.ticksExisted == lastDamageTick+1) : (this.ticksExisted - lastDamageTick) >60;
+				//am i being attacked?
+
+				boolean isdynamic = Configs.cached.DYNAMIC_DPS;
+				boolean flag = isdynamic? (this.ticksExisted == lastDamageTick+1) : (this.ticksExisted - lastDamageTick) >60;
 
 
-			//only show damage after second damage tick
-			if (flag && firstDamageTick < lastDamageTick) {
+				//only show damage after second damage tick
+				if (flag && firstDamageTick < lastDamageTick) {
 
-				// it's not actual DPS but "damage per tick scaled to seconds".. but meh.
-				float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
-				float dps = damageTaken / seconds;
-				for (ServerPlayerEntity p : this.currentlyAttacking) {
-					if(p.getDistance(this)<64)
-						p.sendStatusMessage(new TranslationTextComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
+					// it's not actual DPS but "damage per tick scaled to seconds".. but meh.
+					float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
+					float dps = damageTaken / seconds;
+					for (ServerPlayerEntity p : this.currentlyAttacking) {
+						if(p.getDistance(this)<64)
+							p.sendStatusMessage(new TranslationTextComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
+					}
 
 				}
-
-
-			}
-			//out of combat. reset variables
-			if(this.ticksExisted - lastDamageTick >60){
-				this.currentlyAttacking.clear();
-				this.damageTaken = 0;
-				this.firstDamageTick = 0;
+				//out of combat. reset variables
+				if(this.ticksExisted - lastDamageTick >60){
+					this.currentlyAttacking.clear();
+					this.damageTaken = 0;
+					this.firstDamageTick = 0;
+				}
 			}
 		}
+
+
+
 	}
 
+	@Override
+	public boolean canBreatheUnderwater() {
+	  return true;
+	}
 
 	@Override
 	protected boolean isMovementBlocked() {
@@ -548,47 +608,20 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
 	@Override
 	public boolean canBeCollidedWith() {
-		return true;
-	}
-
-	//called when entity is first spawned/loaded
-	@Override
-	public void writeSpawnData(PacketBuffer buffer) {
-		buffer.writeBoolean(this.sheared);
-		//hijacking this method to do some other server calculations. there's probably an event just for this but I haven't found it
-		this.updateOnLoadServer();
-
-	}
-
-	//called when entity is first spawned/loaded
-	@Override
-	public void readSpawnData(PacketBuffer additionalData) {
-		this.sheared = additionalData.readBoolean();
-		//and this as well to do some other client calculations
-		this.updateOnLoadClient();
-
-	}
-
-
-	@Override
-	public void writeAdditional(CompoundNBT tag) {
-		super.writeAdditional(tag);
-		tag.putInt("Type", this.mobType.ordinal());
-		tag.putInt("NumberPos", this.mynumberpos);
-		tag.putBoolean("Sheared", this.sheared);
+		return super.canBeCollidedWith();
 	}
 
 	@Override
-	public void readAdditional(CompoundNBT tag) {
-		super.readAdditional(tag);
-		this.mobType = MobAttribute.values()[tag.getInt("Type")];
-		this.mynumberpos = tag.getInt("NumberPos");
-		this.sheared = tag.getBoolean("Sheared");
+	public boolean onLivingFall(float l, float d) {
+		return false;
 	}
 
 	@Override
-	public CreatureAttribute getCreatureAttribute() {
-		return this.mobType.get();
+	protected void updateFallState(double y, boolean onGroundIn, BlockState state, BlockPos pos) {}
+
+	@Override
+	public void setNoGravity(boolean ignored) {
+		super.setNoGravity(true);
 	}
 
 	@Override
@@ -597,23 +630,21 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 	}
 
 	@Override
-	protected void dropSpecialItems(DamageSource source, int looting, boolean recentlyHitIn) {
-		super.dropSpecialItems(source, looting, recentlyHitIn);
-	}
+	protected void dropSpecialItems(DamageSource source, int looting, boolean recentlyHitIn) {}
 
 	@Override
-	public net.minecraft.util.SoundEvent getHurtSound(DamageSource ds) {
+	public SoundEvent getHurtSound(DamageSource ds) {
 		return ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.armor_stand.hit"));
 	}
 
 	@Override
-	public net.minecraft.util.SoundEvent getDeathSound() {
+	public SoundEvent getDeathSound() {
 		return ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("entity.armor_stand.break"));
 	}
 
 	@Override
-	public boolean onLivingFall(float l, float d) {
-		return false;
+	public CreatureAttribute getCreatureAttribute() {
+		return this.mobType.get();
 	}
 
 	public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
@@ -626,21 +657,15 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 				.createMutableAttribute(Attributes.FLYING_SPEED, 0D);
 	}
 
-	@Override
-	protected void updateFallState(double y, boolean onGroundIn, BlockState state, BlockPos pos) {
-	}
 
-	@Override
-	public void setNoGravity(boolean ignored) {
-		super.setNoGravity(true);
-	}
 
 	private enum MobAttribute{
 		UNDEFINED,
 		UNDEAD,
 		WATER,
 		ILLAGER,
-		ARTHROPOD;
+		ARTHROPOD,
+		SCARECROW;
 
 		public CreatureAttribute get(){
 			switch (this){

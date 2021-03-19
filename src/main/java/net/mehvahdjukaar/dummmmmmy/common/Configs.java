@@ -2,23 +2,11 @@
 package net.mehvahdjukaar.dummmmmmy.common;
 
 import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
 public class Configs {
 
@@ -47,6 +35,9 @@ public class Configs {
 	public static ForgeConfigSpec.ConfigValue<String> DAMAGE_LIGHTNING;
 	public static ForgeConfigSpec.ConfigValue<String> DAMAGE_CACTUS;
 
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> WHITELIST;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
+
 	static {
 		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -72,6 +63,13 @@ public class Configs {
 		DAMAGE_FIRE = builder.define("fire","0xFF9900");
 		DAMAGE_LIGHTNING = builder.define("lightning","0xFFFF00");
 		DAMAGE_CACTUS = builder.define("cactus","0x006600");
+
+		builder.pop();
+
+		builder.push("scarecrow").comment("equip a dummy with a pumpkin to make hit act as a scarecrow");
+
+		WHITELIST = builder.comment("all animal entities will be scared. add here additional ones that are not included").defineList("mobs_whitelist", Collections.singletonList(""), s->true);
+		BLACKLIST = builder.comment("animal entities that will not be scared").defineList("mobs_blacklist", Collections.singletonList(""), s->true);
 
 		builder.pop();
 
@@ -109,6 +107,9 @@ public class Configs {
 		public static int DAMAGE_LIGHTNING;
 		public static int DAMAGE_CACTUS;
 
+		public static List<? extends String> WHITELIST;
+		public static List<? extends String> BLACKLIST;
+
 		public static void refresh(){
 			ANIMATION_INTENSITY = Configs.ANIMATION_INTENSITY.get();
 			SHOW_HEARTHS = Configs.SHOW_HEARTHS.get();
@@ -127,8 +128,10 @@ public class Configs {
 			DAMAGE_LIGHTNING = parseHex(Configs.DAMAGE_LIGHTNING.get());
 			DAMAGE_CACTUS = parseHex(Configs.DAMAGE_CACTUS.get());
 
+			WHITELIST = Configs.WHITELIST.get();
+			BLACKLIST = Configs.BLACKLIST.get();
+
 		}
 	}
-
 
 }
