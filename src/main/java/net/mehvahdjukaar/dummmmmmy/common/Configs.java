@@ -13,9 +13,12 @@ public class Configs {
 	public static void reloadConfigsEvent(ModConfig.ModConfigEvent event) {
 		if(event.getConfig().getSpec() == CLIENT_CONFIG)
 			cached.refresh();
+		else if(event.getConfig().getSpec() == SERVER_CONFIG){
+			cachedServer.refresh();
+		}
 	}
 
-
+	public static ForgeConfigSpec SERVER_CONFIG;
 	public static ForgeConfigSpec CLIENT_CONFIG;
 
 	public static ForgeConfigSpec.DoubleValue ANIMATION_INTENSITY;
@@ -35,6 +38,7 @@ public class Configs {
 	public static ForgeConfigSpec.ConfigValue<String> DAMAGE_LIGHTNING;
 	public static ForgeConfigSpec.ConfigValue<String> DAMAGE_CACTUS;
 
+	public static ForgeConfigSpec.IntValue RADIUS;
 	public static ForgeConfigSpec.ConfigValue<List<? extends String>> WHITELIST;
 	public static ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLIST;
 
@@ -66,16 +70,27 @@ public class Configs {
 
 		builder.pop();
 
-		builder.push("scarecrow").comment("equip a dummy with a pumpkin to make hit act as a scarecrow");
 
-		WHITELIST = builder.comment("all animal entities will be scared. add here additional ones that are not included").defineList("mobs_whitelist", Collections.singletonList(""), s->true);
-		BLACKLIST = builder.comment("animal entities that will not be scared").defineList("mobs_blacklist", Collections.singletonList(""), s->true);
-
-		builder.pop();
 
 		builder.pop();
 
 		CLIENT_CONFIG = builder.build();
+
+
+
+
+		ForgeConfigSpec.Builder builder2 = new ForgeConfigSpec.Builder();
+
+		builder2.push("scarecrow").comment("equip a dummy with a pumpkin to make hit act as a scarecrow");
+
+		WHITELIST = builder2.comment("all animal entities will be scared. add here additional ones that are not included").defineList("mobs_whitelist", Collections.singletonList(""), s->true);
+		BLACKLIST = builder2.comment("animal entities that will not be scared").defineList("mobs_blacklist", Collections.singletonList(""), s->true);
+
+		RADIUS = builder2.comment("scaring radius").defineInRange("scare_radius",12,0,100);
+
+		builder2.pop();
+
+		SERVER_CONFIG = builder2.build();
 	}
 
 	private static int parseHex(String s){
@@ -86,6 +101,22 @@ public class Configs {
 			DummmmmmyMod.LOGGER.warn("failed to parse damage source color from config");
 		}
 		return hex;
+	}
+
+
+	public static class cachedServer {
+
+		public static List<? extends String> WHITELIST;
+		public static List<? extends String> BLACKLIST;
+		public static int RADIUS;
+
+
+		public static void refresh(){
+
+			RADIUS = Configs.RADIUS.get();
+			WHITELIST = Configs.WHITELIST.get();
+			BLACKLIST = Configs.BLACKLIST.get();
+		}
 	}
 
 
@@ -107,8 +138,6 @@ public class Configs {
 		public static int DAMAGE_LIGHTNING;
 		public static int DAMAGE_CACTUS;
 
-		public static List<? extends String> WHITELIST;
-		public static List<? extends String> BLACKLIST;
 
 		public static void refresh(){
 			ANIMATION_INTENSITY = Configs.ANIMATION_INTENSITY.get();
@@ -127,9 +156,6 @@ public class Configs {
 			DAMAGE_FIRE = parseHex(Configs.DAMAGE_FIRE.get());
 			DAMAGE_LIGHTNING = parseHex(Configs.DAMAGE_LIGHTNING.get());
 			DAMAGE_CACTUS = parseHex(Configs.DAMAGE_CACTUS.get());
-
-			WHITELIST = Configs.WHITELIST.get();
-			BLACKLIST = Configs.BLACKLIST.get();
 
 		}
 	}

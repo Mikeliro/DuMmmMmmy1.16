@@ -29,7 +29,9 @@ public class Events {
     }
 
     public static boolean isScared(Entity entity){
-        return entity instanceof AnimalEntity;
+        String name = entity.getType().getRegistryName().toString();
+        return (entity instanceof AnimalEntity || Configs.cachedServer.WHITELIST.contains(name))
+                && !Configs.cachedServer.BLACKLIST.contains(name);
     }
 
     public static boolean isScarecrowInRange(Entity entity, World world){
@@ -58,7 +60,7 @@ public class Events {
 
             CreatureEntity mob = (CreatureEntity) e;
             mob.goalSelector.addGoal(3, new AvoidEntityGoal<>(mob, TargetDummyEntity.class,
-                    12.0F, 1.0D, 1.3D, d -> ((TargetDummyEntity) d).isScarecrow()));
+                    Configs.cachedServer.RADIUS, 1.0D, 1.3D, d -> ((TargetDummyEntity) d).isScarecrow()));
 
         }
     }

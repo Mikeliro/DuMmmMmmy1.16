@@ -26,6 +26,7 @@ public class DummmmmmyMod {
 	public DummmmmmyMod() {
 
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Configs.CLIENT_CONFIG);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Configs.SERVER_CONFIG);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(Configs::reloadConfigsEvent);
 
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
