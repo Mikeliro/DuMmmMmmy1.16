@@ -25,8 +25,8 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T>
         float size = 1;
         if(slot == EquipmentSlotType.LEGS) size = 0.5f;
         constructor(size);
-        this.standPlate.showModel = false;
-        this.bipedRightLeg.showModel = false;
+        this.standPlate.visible = false;
+        this.rightLeg.visible = false;
     }
     //normal model constructor. had to make two cause it was causing crashes with mods.
     public TargetDummyModel() {
@@ -43,33 +43,33 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T>
 
         this.standPlate = new ModelRenderer(this, 0, 32);
         this.standPlate.addBox(-7.0F, 12F, -7.0F, 14, 1, 14, size);
-        this.standPlate.setRotationPoint(0F, 11F , 0.0F);
+        this.standPlate.setPos(0F, 11F , 0.0F);
 
-        this.bipedRightArm = new ModelRenderer(this, 40, 16);
-        this.bipedRightArm.addBox(-3.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
-        this.bipedRightArm.setRotationPoint(-2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.bipedLeftArm = new ModelRenderer(this, 40, 16);
-        this.bipedLeftArm.mirror = true;
-        this.bipedLeftArm.addBox(-1.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
-        this.bipedLeftArm.setRotationPoint(2.5F, 2.0F + yOffsetIn, -0.005F);
+        this.rightArm = new ModelRenderer(this, 40, 16);
+        this.rightArm.addBox(-3.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
+        this.rightArm.setPos(-2.5F, 2.0F + yOffsetIn, -0.005F);
+        this.leftArm = new ModelRenderer(this, 40, 16);
+        this.leftArm.mirror = true;
+        this.leftArm.addBox(-1.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
+        this.leftArm.setPos(2.5F, 2.0F + yOffsetIn, -0.005F);
 
-        this.bipedHead = new ModelRenderer(this, 0, 0);
-        this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size);
-        this.bipedHead.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
+        this.head = new ModelRenderer(this, 0, 0);
+        this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size);
+        this.head.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
 
         //mod support. I'm not using this
-        this.bipedHeadwear = new ModelRenderer(this, 32, 0);
-        this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size + 0.5F);
-        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
+        this.hat = new ModelRenderer(this, 32, 0);
+        this.hat.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size + 0.5F);
+        this.hat.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
 
-        this.bipedLeftLeg = new ModelRenderer(this, 0, 16);
-        this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, size+legOffset);
-        this.bipedLeftLeg.setRotationPoint(0F, 12.0F + yOffsetIn, 0.0F);
-        this.bipedRightLeg = new ModelRenderer(this, 0, 0);
+        this.leftLeg = new ModelRenderer(this, 0, 16);
+        this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, size+legOffset);
+        this.leftLeg.setPos(0F, 12.0F + yOffsetIn, 0.0F);
+        this.rightLeg = new ModelRenderer(this, 0, 0);
 
-        this.bipedBody = new ModelRenderer(this, 16, 16);
-        this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, size );
-        this.bipedBody.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
+        this.body = new ModelRenderer(this, 16, 16);
+        this.body.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, size );
+        this.body.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
 
     }
 
@@ -104,47 +104,47 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T>
 
 */
     public void rotateModelX(ModelRenderer model, float nrx, float nry, float nrz, float angle){
-        Vector3d oldrot = new Vector3d(model.rotationPointX, model.rotationPointY, model.rotationPointZ);
+        Vector3d oldrot = new Vector3d(model.x, model.y, model.z);
         Vector3d actualrot = new Vector3d(nrx, nry, nrz);
 
-        Vector3d newrot = actualrot.add(oldrot.subtract(actualrot).rotatePitch(-angle));
+        Vector3d newrot = actualrot.add(oldrot.subtract(actualrot).xRot(-angle));
 
-        model.setRotationPoint((float) newrot.getX(), (float) newrot.getY(), (float) newrot.getZ());
-        model.rotateAngleX = angle;
+        model.setPos((float) newrot.x(), (float) newrot.y(), (float) newrot.z());
+        model.xRot = angle;
     }
     public void rotateModelY(ModelRenderer model, float nrx, float nry, float nrz, float angle, int mult){
-        Vector3d oldrot = new Vector3d(model.rotationPointX, model.rotationPointY, model.rotationPointZ);
+        Vector3d oldrot = new Vector3d(model.x, model.y, model.z);
         Vector3d actualrot = new Vector3d(nrx, nry, nrz);
 
-        Vector3d newrot = actualrot.add(oldrot.subtract(actualrot).rotatePitch(-angle));
+        Vector3d newrot = actualrot.add(oldrot.subtract(actualrot).xRot(-angle));
 
-        model.setRotationPoint((float) newrot.getX(), (float) newrot.getY(), (float) newrot.getZ());
-        model.rotateAngleY = angle*mult;
+        model.setPos((float) newrot.x(), (float) newrot.y(), (float) newrot.z());
+        model.yRot = angle*mult;
     }
 
     @Override
-    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green,
+    public void renderToBuffer(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green,
                        float blue, float alpha) {
-        matrixStackIn.push();
+        matrixStackIn.pushPose();
 
         this.standPlate.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 
-        this.bipedHead.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.bipedRightArm.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.bipedLeftArm.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.bipedBody.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.bipedLeftLeg.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.head.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.rightArm.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.leftArm.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.body.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.leftLeg.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 
-        this.bipedHeadwear.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        matrixStackIn.pop();
+        this.hat.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        matrixStackIn.popPose();
     }
 
     //TODO: this is horrible
     @Override
-    public void setLivingAnimations(T entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
-        super.setLivingAnimations(entityIn, limbSwing, limbSwingAmount, partialTick);
+    public void prepareMobModel(T entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
+        super.prepareMobModel(entityIn, limbSwing, limbSwingAmount, partialTick);
         float phase = MathHelper.lerp(partialTick,entityIn.prevShakeAmount,entityIn.shakeAmount);
-        float swing = MathHelper.lerp(partialTick,entityIn.prevLimbswing,entityIn.limbSwing);
+        float swing = MathHelper.lerp(partialTick,entityIn.prevLimbSwing,entityIn.animationPosition);
         float shake = Math.min((float) (swing * Configs.cached.ANIMATION_INTENSITY), 40f);
 
         if (shake > 0) {
@@ -159,12 +159,12 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T>
     }
 
     @Override
-    public void setRotationAngles(TargetDummyEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
+    public void setupAnim(TargetDummyEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
                                   float headPitch) {
 
 
-        // un-rotate the stand plate so it's aligned to the block grid
-        this.standPlate.rotateAngleY = -(entityIn).rotationYaw / (180F / (float) Math.PI);
+        // un-rotate the stand plate, so it's aligned to the block grid
+        this.standPlate.yRot = -(entityIn).yRot / (180F / (float) Math.PI);
 
 
         float n = 1.5f;
@@ -176,41 +176,41 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends BipedModel<T>
         float xangle = r/2;
 
 
-        this.bipedLeftLeg.setRotationPoint(0, 12.0F + yOffsetIn, 0.0F);
-        this.rotateModelX(this.bipedLeftLeg, 0, 24 + yOffsetIn, 0, xangle);
+        this.leftLeg.setPos(0, 12.0F + yOffsetIn, 0.0F);
+        this.rotateModelX(this.leftLeg, 0, 24 + yOffsetIn, 0, xangle);
         //for mod support
-        this.bipedRightLeg.setRotationPoint(0, 12.0F + yOffsetIn, 0.0F);
-        this.rotateModelX(this.bipedRightLeg, 0.01f, 24 + yOffsetIn+0.01f, 0.01f, xangle);
+        this.rightLeg.setPos(0, 12.0F + yOffsetIn, 0.0F);
+        this.rotateModelX(this.rightLeg, 0.01f, 24 + yOffsetIn+0.01f, 0.01f, xangle);
 
-        this.bipedBody.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
-        this.rotateModelX(this.bipedBody, 0, 24 + yOffsetIn, 0, xangle);
-
-
-        this.bipedRightArm.setRotationPoint(-2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.rotateModelY(this.bipedRightArm, 0, 24 + yOffsetIn, 0, xangle, -1);
-
-        this.bipedLeftArm.setRotationPoint(2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.rotateModelY(this.bipedLeftArm, 0, 24 + yOffsetIn, 0, xangle, 1);
+        this.body.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
+        this.rotateModelX(this.body, 0, 24 + yOffsetIn, 0, xangle);
 
 
+        this.rightArm.setPos(-2.5F, 2.0F + yOffsetIn, -0.005F);
+        this.rotateModelY(this.rightArm, 0, 24 + yOffsetIn, 0, xangle, -1);
 
-        this.bipedHead.setRotationPoint(0.0F, 0.0F + yOffsetIn, 0.0F);
-        this.rotateModelX(this.bipedHead, 0, 24 + yOffsetIn, 0, xangle);
+        this.leftArm.setPos(2.5F, 2.0F + yOffsetIn, -0.005F);
+        this.rotateModelY(this.leftArm, 0, 24 + yOffsetIn, 0, xangle, 1);
+
+
+
+        this.head.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
+        this.rotateModelX(this.head, 0, 24 + yOffsetIn, 0, xangle);
         //mod support
-        this.bipedHeadwear.copyModelAngles(this.bipedHead);
+        this.hat.copyFrom(this.head);
 
 
 
-        this.bipedHead.rotateAngleX = -r; //-r
-        this.bipedHead.rotateAngleZ = r2; //r2
+        this.head.xRot = -r; //-r
+        this.head.zRot = r2; //r2
 
 
         //rotate arms up
-        this.bipedRightArm.rotateAngleZ = (float) Math.PI / 2f;
-        this.bipedLeftArm.rotateAngleZ = -(float) Math.PI / 2f;
+        this.rightArm.zRot = (float) Math.PI / 2f;
+        this.leftArm.zRot = -(float) Math.PI / 2f;
         //swing arm
-        this.bipedRightArm.rotateAngleX = r * n;
-        this.bipedLeftArm.rotateAngleX = r * n;
+        this.rightArm.xRot = r * n;
+        this.leftArm.xRot = r * n;
 
     }
 

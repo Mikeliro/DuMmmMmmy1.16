@@ -10,8 +10,6 @@ public class ClientSetup {
 
     public static void init(FMLClientSetupEvent event) {
 
-
-
         RenderingRegistry.registerEntityRenderingHandler(Registry.TARGET_DUMMY.get(), TargetDummyRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Registry.DUMMY_NUMBER.get(), NumberRenderer::new);
 

@@ -20,26 +20,26 @@ public class LayerDummyArmor<T extends LivingEntity, M extends BipedModel<T>, A 
 
 
     @Override
-    protected void setModelSlotVisible(A modelIn, EquipmentSlotType slotIn) {
-        modelIn.setVisible(false);
+    public void setPartVisibility(A modelIn, EquipmentSlotType slotIn) {
+        modelIn.setAllVisible(false);
         //boolean flag = modelIn instanceof  TargetDummyModel;
-        modelIn.bipedRightLeg.showModel = false;
+        modelIn.rightLeg.visible = false;
         switch (slotIn) {
             case HEAD:
-                modelIn.bipedHead.showModel = true;
+                modelIn.head.visible = true;
                 break;
             case CHEST:
-                modelIn.bipedBody.showModel = true;
-                modelIn.bipedRightArm.showModel = true;
-                modelIn.bipedLeftArm.showModel = true;
+                modelIn.body.visible = true;
+                modelIn.rightArm.visible = true;
+                modelIn.leftArm.visible = true;
                 break;
             case LEGS:
-                modelIn.bipedBody.showModel = true;
-                modelIn.bipedLeftLeg.showModel = true;
+                modelIn.body.visible = true;
+                modelIn.leftLeg.visible = true;
                 break;
             case FEET:
-                modelIn.bipedLeftLeg.showModel = true;
-                modelIn.bipedBody.showModel = false;
+                modelIn.leftLeg.visible = true;
+                modelIn.body.visible = false;
         }
     }
 

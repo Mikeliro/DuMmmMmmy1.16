@@ -23,27 +23,27 @@ public class NumberRenderer extends EntityRenderer<DummyNumberEntity> {
     @Override
     public void render(DummyNumberEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn,
                        int packedLightIn) {
-        FontRenderer fontrenderer = this.renderManager.getFontRenderer();
-        matrixStackIn.push();
+        FontRenderer fontrenderer = this.entityRenderDispatcher.getFont();
+        matrixStackIn.pushPose();
         // translate towards player
-        PlayerEntity player = Minecraft.getInstance().player;
+        //PlayerEntity player = Minecraft.getInstance().player;
 
 
         //Vector3d v = (player.getPositionVec().subtract(entityIn.getPositionVec())).normalize();
-       // matrixStackIn.translate(v.getX(), v.getY(), v.getZ());
+        //matrixStackIn.translate(v.getX(), v.getY(), v.getZ());
 
 
         // animation
         matrixStackIn.translate(0, MathHelper.lerp(partialTicks, entityIn.prevDy, entityIn.dy), 0);
         // rotate towards camera
-        double d = Math.sqrt(this.renderManager.getDistanceToCamera(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ()));
+        double d = Math.sqrt(this.entityRenderDispatcher.distanceToSqr(entityIn.getX(), entityIn.getY(), entityIn.getZ()));
 
 
         float fadeout = MathHelper.lerp(partialTicks, entityIn.prevFadeout, entityIn.fadeout);
 
-        float defscale = 0.006f;
-        float scale = (float) (defscale * d);
-        matrixStackIn.rotate(this.renderManager.getCameraOrientation());
+        float defScale = 0.006f;
+        float scale = (float) (defScale * d);
+        matrixStackIn.mulPose(this.entityRenderDispatcher.cameraOrientation());
         // matrixStackIn.translate(0, 0, -1);
         // animation
         matrixStackIn.translate(MathHelper.lerp(partialTicks, entityIn.prevDx, entityIn.dx),0, 0);
@@ -56,14 +56,14 @@ public class NumberRenderer extends EntityRenderer<DummyNumberEntity> {
         float number = Configs.cached.SHOW_HEARTHS? entityIn.getNumber()/2f : entityIn.getNumber();
         String s = df.format(number);
         // center string
-        matrixStackIn.translate((-fontrenderer.getStringWidth(s) / 2f) + 0.5f, 0, 0);
-        fontrenderer.renderString(s, 0, 0, entityIn.color, true, matrixStackIn.getLast().getMatrix(), bufferIn, false, 0, packedLightIn);
+        matrixStackIn.translate((-fontrenderer.width(s) / 2f) + 0.5f, 0, 0);
+        fontrenderer.drawInBatch(s, 0, 0, entityIn.color.getColor(), true, matrixStackIn.last().pose(), bufferIn, false, 0, packedLightIn);
         // matrixStackIn.translate(fontrenderer.getStringWidth(s) / 2, 0, 0);
-        matrixStackIn.pop();
+        matrixStackIn.popPose();
     }
 
     @Override
-    public ResourceLocation getEntityTexture(DummyNumberEntity entity) {
+    public ResourceLocation getTextureLocation(DummyNumberEntity entity) {
         return null;
     }
 }

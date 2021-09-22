@@ -19,137 +19,141 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class NetworkHandler {
-	public static SimpleChannel INSTANCE;
-	private static int ID = 0;
-	private static final String PROTOCOL_VERSION = "1";
-	public static int nextID() {
-		return ID++;
-	}
+    public static SimpleChannel INSTANCE;
+    private static int ID = 0;
+    private static final String PROTOCOL_VERSION = "1";
+
+    public static int nextID() {
+        return ID++;
+    }
 
 
-	public static void registerMessages() {
-		INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(DummmmmmyMod.MOD_ID, "dummychannel"), () -> PROTOCOL_VERSION,
-				PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+    public static void registerMessages() {
+        INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(DummmmmmyMod.MOD_ID, "dummychannel"), () -> PROTOCOL_VERSION,
+                PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
-		INSTANCE.registerMessage(nextID(), PacketDamageNumber.class, PacketDamageNumber::toBytes, PacketDamageNumber::new,
-				PacketDamageNumber::handle);
+        INSTANCE.registerMessage(nextID(), PacketDamageNumber.class, PacketDamageNumber::toBytes, PacketDamageNumber::new,
+                PacketDamageNumber::handle);
 
-		INSTANCE.registerMessage(nextID(), PacketSyncEquip.class, PacketSyncEquip::toBytes, PacketSyncEquip::new,
-				PacketSyncEquip::handle);
-
-
-		INSTANCE.registerMessage(nextID(), PacketChangeSkin.class, PacketChangeSkin::toBytes, PacketChangeSkin::new,
-				PacketChangeSkin::handle);
-
-	}
+        INSTANCE.registerMessage(nextID(), PacketSyncEquip.class, PacketSyncEquip::toBytes, PacketSyncEquip::new,
+                PacketSyncEquip::handle);
 
 
-	private interface Message{}
-	public static void sendToAllTracking(Entity entity, ServerWorld world, Message message) {
-		world.getChunkProvider().sendToAllTracking(entity, INSTANCE.toVanillaPacket(message, NetworkDirection.PLAY_TO_CLIENT));
-	}
-
-	public static class PacketDamageNumber implements Message{
-		private final int entityID;
-		private final float damage;
-		private final float shake;
-		public PacketDamageNumber(PacketBuffer buf) {
-			this.entityID = buf.readInt();
-			this.damage = buf.readFloat();
-			this.shake = buf.readFloat();
-		}
-
-		public PacketDamageNumber(int id, float damage, float shakeAmount) {
-			this.entityID = id;
-			this.damage = damage;
-			this.shake = shakeAmount;
-		}
-
-		public void toBytes(PacketBuffer buf) {
-			buf.writeInt(this.entityID);
-			buf.writeFloat(this.damage);
-			buf.writeFloat(this.shake);
-		}
-
-		public void handle(Supplier<NetworkEvent.Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity instanceof TargetDummyEntity) {
-					TargetDummyEntity dummy = (TargetDummyEntity) entity;
-					dummy.limbSwing = shake;
-				}
-			});
-			ctx.get().setPacketHandled(true);
-		}
-	}
+        INSTANCE.registerMessage(nextID(), PacketChangeSkin.class, PacketChangeSkin::toBytes, PacketChangeSkin::new,
+                PacketChangeSkin::handle);
+    }
 
 
-	public static class PacketSyncEquip implements Message{
-		private final int entityID;
-		private final int slotId;
-		private final ItemStack itemstack;
-		public PacketSyncEquip(PacketBuffer buf) {
-			this.entityID = buf.readInt();
-		    this.slotId = buf.readInt();
+    private interface Message {
+    }
 
-		    this.itemstack = buf.readItemStack();
-		}
+    public static void sendToAllTracking(Entity entity, ServerWorld world, Message message) {
+        world.getChunkSource().broadcast(entity, INSTANCE.toVanillaPacket(message, NetworkDirection.PLAY_TO_CLIENT));
+    }
 
-		public PacketSyncEquip(int entityId, int slotId, @Nonnull ItemStack itemstack) {
-			this.entityID = entityId;
-		    this.slotId = slotId;
-		    this.itemstack = itemstack.copy();
-		}
+    public static class PacketDamageNumber implements Message {
+        private final int entityID;
+        private final float damage;
+        private final float shake;
 
-		public void toBytes(PacketBuffer buf) {
-			buf.writeInt(this.entityID);
-		    buf.writeInt(slotId);  
-		    buf.writeItemStack(itemstack);
-		}
+        public PacketDamageNumber(PacketBuffer buf) {
+            this.entityID = buf.readInt();
+            this.damage = buf.readFloat();
+            this.shake = buf.readFloat();
+        }
 
-		public void handle(Supplier<NetworkEvent.Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity instanceof TargetDummyEntity) {
-					TargetDummyEntity dummy = (TargetDummyEntity) entity;
-					dummy.setItemStackToSlot(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, this.slotId), this.itemstack);
-				}
-			});
-			ctx.get().setPacketHandled(true);
-		}
-	}
+        public PacketDamageNumber(int id, float damage, float shakeAmount) {
+            this.entityID = id;
+            this.damage = damage;
+            this.shake = shakeAmount;
+        }
+
+        public void toBytes(PacketBuffer buf) {
+            buf.writeInt(this.entityID);
+            buf.writeFloat(this.damage);
+            buf.writeFloat(this.shake);
+        }
+
+        public void handle(Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> {
+                Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
+                if (entity instanceof TargetDummyEntity) {
+                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
+                    dummy.animationPosition = shake;
+                }
+            });
+            ctx.get().setPacketHandled(true);
+        }
+    }
 
 
-	public static class PacketChangeSkin implements Message{
-		private final int entityID;
-		private final boolean skin;
+    public static class PacketSyncEquip implements Message {
+        private final int entityID;
+        private final int slotId;
+        private final ItemStack itemstack;
 
-		public PacketChangeSkin(PacketBuffer buf) {
-			this.entityID = buf.readInt();
-		    this.skin = buf.readBoolean();
-		}
+        public PacketSyncEquip(PacketBuffer buf) {
+            this.entityID = buf.readInt();
+            this.slotId = buf.readInt();
 
-		public PacketChangeSkin(int entityId, boolean skin) {
-			this.entityID = entityId;
-			this.skin = skin;
-		}
+            this.itemstack = buf.readItem();
+        }
 
-		public void toBytes(PacketBuffer buf) {
-			buf.writeInt(this.entityID);
-		    buf.writeBoolean(this.skin);  
-		}
+        public PacketSyncEquip(int entityId, int slotId, @Nonnull ItemStack itemstack) {
+            this.entityID = entityId;
+            this.slotId = slotId;
+            this.itemstack = itemstack.copy();
+        }
 
-		public void handle(Supplier<NetworkEvent.Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				Entity entity = Minecraft.getInstance().world.getEntityByID(this.entityID);
-				if (entity instanceof TargetDummyEntity) {
-					TargetDummyEntity dummy = (TargetDummyEntity) entity;
-					dummy.sheared=this.skin;
-				}
-			});
-			ctx.get().setPacketHandled(true);
-		}
-	}
+        public void toBytes(PacketBuffer buf) {
+            buf.writeInt(this.entityID);
+            buf.writeInt(slotId);
+            buf.writeItem(itemstack);
+        }
 
-	
+        public void handle(Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> {
+                Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
+                if (entity instanceof TargetDummyEntity) {
+                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
+                    dummy.setItemSlot(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, this.slotId), this.itemstack);
+                }
+            });
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+
+    public static class PacketChangeSkin implements Message {
+        private final int entityID;
+        private final boolean skin;
+
+        public PacketChangeSkin(PacketBuffer buf) {
+            this.entityID = buf.readInt();
+            this.skin = buf.readBoolean();
+        }
+
+        public PacketChangeSkin(int entityId, boolean skin) {
+            this.entityID = entityId;
+            this.skin = skin;
+        }
+
+        public void toBytes(PacketBuffer buf) {
+            buf.writeInt(this.entityID);
+            buf.writeBoolean(this.skin);
+        }
+
+        public void handle(Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> {
+                Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
+                if (entity instanceof TargetDummyEntity) {
+                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
+                    dummy.sheared = this.skin;
+                }
+            });
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+
 }

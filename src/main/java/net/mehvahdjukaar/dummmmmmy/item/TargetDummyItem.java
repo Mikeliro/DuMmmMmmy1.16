@@ -25,34 +25,34 @@ public class TargetDummyItem extends Item {
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context) {
-		Direction direction = context.getFace();
+	public ActionResultType useOn(ItemUseContext context) {
+		Direction direction = context.getClickedFace();
 		if (direction == Direction.DOWN) {
 			return ActionResultType.FAIL;
 		} else {
-			World world = context.getWorld();
+			World world = context.getLevel();
 			BlockItemUseContext blockitemusecontext = new BlockItemUseContext(context);
-			BlockPos blockpos = blockitemusecontext.getPos();
-			BlockPos blockpos1 = blockpos.up();
-			if (blockitemusecontext.canPlace() && world.getBlockState(blockpos1).isReplaceable(blockitemusecontext)) {
+			BlockPos blockpos = blockitemusecontext.getClickedPos();
+			BlockPos blockpos1 = blockpos.above();
+			if (blockitemusecontext.canPlace() && world.getBlockState(blockpos1).canBeReplaced(blockitemusecontext)) {
 				double d0 = blockpos.getX();
 				double d1 = blockpos.getY();
 				double d2 = blockpos.getZ();
-				List<Entity> list = world.getEntitiesWithinAABBExcludingEntity((Entity) null,
+				List<Entity> list = world.getEntities((Entity) null,
 						new AxisAlignedBB(d0, d1, d2, d0 + 1.0D, d1 + 2.0D, d2 + 1.0D));
 				if (!list.isEmpty()) {
 					return ActionResultType.FAIL;
 				} else {
-					ItemStack itemstack = context.getItem();
-					if (!world.isRemote) {
+					ItemStack itemstack = context.getItemInHand();
+					if (!world.isClientSide) {
 						world.removeBlock(blockpos, false);
 						world.removeBlock(blockpos1, false);
 						TargetDummyEntity dummy = new TargetDummyEntity(world);
-						float f = (float) MathHelper.floor((MathHelper.wrapDegrees(context.getPlacementYaw() - 180.0F) + 11.25) / 22.5F) * 22.5F;
-						dummy.setLocationAndAngles(d0 + 0.5D, d1, d2 + 0.5D, f, 0.0F);
-						EntityType.applyItemNBT(world, context.getPlayer(), dummy, itemstack.getTag());
-						world.addEntity(dummy);
-						world.playSound(null, dummy.getPosX(), dummy.getPosY(), dummy.getPosZ(), SoundEvents.BLOCK_BAMBOO_PLACE,
+						float f = (float) MathHelper.floor((MathHelper.wrapDegrees(context.getRotation() - 180.0F) + 11.25) / 22.5F) * 22.5F;
+						dummy.moveTo(d0 + 0.5D, d1, d2 + 0.5D, f, 0.0F);
+						EntityType.updateCustomEntityTag(world, context.getPlayer(), dummy, itemstack.getTag());
+						world.addFreshEntity(dummy);
+						world.playSound(null, dummy.getX(), dummy.getY(), dummy.getZ(), SoundEvents.BAMBOO_PLACE,
 								SoundCategory.BLOCKS, 0.75F, 0.8F);
 					}
 					itemstack.shrink(1);
