@@ -1,43 +1,20 @@
 package net.mehvahdjukaar.dummmmmmy.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.BipedRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.settings.GraphicsFanciness;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.client.model.pipeline.VertexBufferConsumer;
-import org.lwjgl.opengl.GL11;
+import net.mehvahdjukaar.dummmmmmy.setup.ClientHandler;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 
-import java.util.function.Consumer;
+public class TargetDummyRenderer extends HumanoidMobRenderer<TargetDummyEntity, TargetDummyModel<TargetDummyEntity>> {
 
-public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, TargetDummyModel<TargetDummyEntity>> {
-
-    public TargetDummyRenderer(EntityRendererManager renderManagerIn) {
-        super(renderManagerIn, new TargetDummyModel<>(), 0);
-        this.addLayer(new LayerDummyArmor<>(this, new TargetDummyModel<>(EquipmentSlotType.LEGS), new TargetDummyModel<>(EquipmentSlotType.CHEST)));
+    public TargetDummyRenderer(EntityRendererProvider.Context context) {
+        super(context, new TargetDummyModel<>(context.bakeLayer(ClientHandler.DUMMY_BODY)), 0);
+        this.addLayer(new LayerDummyArmor<>(this,
+                new TargetDummyModel<>(context.bakeLayer(ClientHandler.DUMMY_ARMOR_INNER)),
+                new TargetDummyModel<>(context.bakeLayer(ClientHandler.DUMMY_ARMOR_OUTER))));
     }
 
 
@@ -46,19 +23,19 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         return Configs.cached.SKIN.getSkin(entity.sheared);
     }
 
+/*
 
-
-    public void render2(TargetDummyEntity entity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn) {
+    public void render2(TargetDummyEntity entity, float p_225623_2_, float p_225623_3_, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn) {
         super.render(entity, p_225623_2_, p_225623_3_, matrixStackIn, bufferIn, combinedLightIn);
         ItemStack stack= new ItemStack(Items.SAND);
-        Framebuffer fb = new Framebuffer(16, 16, true, true);
+        RenderTarget fb = new RenderTarget(16, 16, true, true);
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
 
         //itemRenderer.render(stack, ItemCameraTransforms.TransformType.GUI, false, matrixStackIn, bufferIn, combinedLightIn, OverlayTexture.NO_OVERLAY, ibakedmodel);
 
-        IBakedModel ibakedmodel = itemRenderer.getModel(stack, entity.level, null);
+        BakedModel ibakedmodel = itemRenderer.getModel(stack, entity.level, null);
 
-        Framebuffer mcFb = Minecraft.getInstance().getMainRenderTarget();
+        RenderTarget mcFb = Minecraft.getInstance().getMainRenderTarget();
         fb.bindWrite(false);
 
         fb.blitToScreen(500,500,false);
@@ -69,7 +46,7 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         fb.destroyBuffers();
 
         mcFb.bindWrite(false);
-        /*
+
 
         fb.bindRead();
 
@@ -84,7 +61,7 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         fb.unbindRead();
 
 
-         */
+
 
 
 
@@ -102,7 +79,7 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         //int lv = ambLight / 65536;
         //OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lu / 1f, lv / 1f);
 
-        /*
+
         RenderSystem.enableRescaleNormal();  //This hack Storage Drawers uses is crazy!!!
 
         RenderSystem.disableRescaleNormal(); //I guess the purpose is to make the lighting
@@ -111,7 +88,7 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         //still work when the item is flattened
         RenderSystem.enableRescaleNormal();
         matrixStackIn.popPose();
-        */
+
 
 
 
@@ -125,7 +102,7 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
 
     //private static Framebuffer fb = new Framebuffer(16, 16, true, true);
 
-    public static void drawItem(MatrixStack matrices, IRenderTypeBuffer buffer, ItemStack stack, int light) {
+    public static void drawItem(PoseStack matrices, MultiBufferSource buffer, ItemStack stack, int light) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
 
         matrices.pushPose();
@@ -134,8 +111,8 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
 
 
         Minecraft mc = Minecraft.getInstance();
-        GraphicsFanciness cache = mc.options.graphicsMode;
-        mc.options.graphicsMode = GraphicsFanciness.FANCY;
+        GraphicsStatus cache = mc.options.graphicsMode;
+        mc.options.graphicsMode = GraphicsStatus.FANCY;
 
 
 
@@ -166,9 +143,9 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         //    renderHandler.render(tile, tile.getGroup(), slot, 0, partialTickTime);
         //}
 
-        Consumer<IRenderTypeBuffer> finish = (IRenderTypeBuffer buf) -> {
-            if (buf instanceof IRenderTypeBuffer.Impl)
-                ((IRenderTypeBuffer.Impl) buf).endBatch();
+        Consumer<MultiBufferSource> finish = (MultiBufferSource buf) -> {
+            if (buf instanceof MultiBufferSource.BufferSource)
+                ((MultiBufferSource.BufferSource) buf).endBatch();
         };
 
         try {
@@ -177,17 +154,17 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
             matrices.scale(16, 16, 16);
 
             //IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-            IBakedModel itemModel = itemRenderer.getModel(stack, null, null);
+            BakedModel itemModel = itemRenderer.getModel(stack, null, null);
             boolean render3D = itemModel.isGui3d(); // itemModel.func_230044_c_();
             finish.accept(buffer);
 
             if (render3D)
-                RenderHelper.setupFor3DItems();
+                Lighting.setupFor3DItems();
             else
-                RenderHelper.setupForFlatItems();
+                Lighting.setupForFlatItems();
 
             //matrices.last().normal().set(Matrix3f.createScaleMatrix(1, -1, 1));
-            itemRenderer.render(stack, ItemCameraTransforms.TransformType.GUI, false, matrices, buffer, light, OverlayTexture.NO_OVERLAY, itemModel);
+            itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, matrices, buffer, light, OverlayTexture.NO_OVERLAY, itemModel);
             finish.accept(buffer);
         }
         catch (Exception e) {
@@ -197,12 +174,12 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
 
         mc.options.graphicsMode = cache;
         matrices.popPose();
-        RenderHelper.setupLevel(matrices.last().pose());
+        Lighting.setupLevel(matrices.last().pose());
         matrices.popPose();
     }
 
 
-    private static void moveRendering (MatrixStack matrix, float scaleX, float scaleY, float offsetX, float offsetY, float offsetZ) {
+    private static void moveRendering (PoseStack matrix, float scaleX, float scaleY, float offsetX, float offsetY, float offsetZ) {
         // NOTE: RenderItem expects to be called in a context where Y increases toward the bottom of the screen
         // However, for in-world rendering the opposite is true. So we translate up by 1 along Y, and then flip
         // along Y. Since the item is drawn at the back of the drawer, we also translate by `1-offsetZ` to move
@@ -216,5 +193,5 @@ public class TargetDummyRenderer extends BipedRenderer<TargetDummyEntity, Target
         matrix.translate(offsetX, offsetY, 0);
         matrix.scale(scaleX, scaleY, 1);
     }
-
+*/
 }

@@ -4,39 +4,35 @@ package net.mehvahdjukaar.dummmmmmy.entity;
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.common.NetworkHandler;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.block.*;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.Effects;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.raid.Raid;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.extensions.IForgeEntity;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.network.FMLPlayMessages;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fmllegacy.network.FMLPlayMessages;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.awt.*;
@@ -46,7 +42,25 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpawnData, IForgeEntity {
+import net.minecraft.core.NonNullList;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarvedPumpkinBlock;
+import net.minecraft.world.level.block.state.BlockState;
+
+public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData, IForgeEntity {
 
     public float prevLimbSwing = 0;
     public float prevShakeAmount = 0;
@@ -62,21 +76,21 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     public float damageTaken;
     public boolean critical = false; //has just been hit by critical?
     public MobAttribute mobType = MobAttribute.UNDEFINED; //0=undefined, 1=undead, 2=water, 3= illager
-    private final List<ServerPlayerEntity> currentlyAttacking = new ArrayList<>();//players to which display dps message
+    private final List<ServerPlayer> currentlyAttacking = new ArrayList<>();//players to which display dps message
     private int damageNumberPos = 0; //position of damage number in the semicircle
     public boolean sheared = false;
 
     private final NonNullList<ItemStack> lastArmorItem = NonNullList.withSize(4, ItemStack.EMPTY);
 
-    public TargetDummyEntity(FMLPlayMessages.SpawnEntity packet, World world) {
+    public TargetDummyEntity(FMLPlayMessages.SpawnEntity packet, Level world) {
         this(Registry.TARGET_DUMMY.get(), world);
     }
 
-    public TargetDummyEntity(EntityType<TargetDummyEntity> type, World world) {
+    public TargetDummyEntity(EntityType<TargetDummyEntity> type, Level world) {
         super(type, world);
     }
 
-    public TargetDummyEntity(World world) {
+    public TargetDummyEntity(Level world) {
         this(Registry.TARGET_DUMMY.get(), world);
         xpReward = 0;
         //so can take all sorts of damage
@@ -85,14 +99,14 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     @Override
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     //stuff needed by client only?
     //called when entity is first spawned/loaded
     @Override
-    public void writeSpawnData(PacketBuffer buffer) {
+    public void writeSpawnData(FriendlyByteBuf buffer) {
         buffer.writeBoolean(this.sheared);
         //hijacking this method to do some other server calculations. there's probably an event just for this but I haven't found it
         this.updateOnLoadServer();
@@ -100,14 +114,14 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
     //called when entity is first spawned/loaded
     @Override
-    public void readSpawnData(PacketBuffer additionalData) {
+    public void readSpawnData(FriendlyByteBuf additionalData) {
         this.sheared = additionalData.readBoolean();
         //and this as well to do some other client calculations
         this.updateOnLoadClient();
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Type", this.mobType.ordinal());
         tag.putInt("NumberPos", this.damageNumberPos);
@@ -115,7 +129,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.mobType = MobAttribute.values()[tag.getInt("Type")];
         this.damageNumberPos = tag.getInt("NumberPos");
@@ -123,7 +137,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     public void updateOnLoadClient() {
-        float r = this.yRot;
+        float r = this.getYRot();
         this.yHeadRotO = this.yHeadRot = r;
         this.yRotO = r;
         this.yBodyRotO = this.yBodyRot = r;
@@ -136,33 +150,33 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
     // dress it up! :D
     @Override
-    public ActionResultType interactAt(PlayerEntity player, Vector3d vec, Hand hand) {
+    public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
         boolean invchanged = false;
-        if (!player.isSpectator() && player.abilities.mayBuild) {
+        if (!player.isSpectator() && player.getAbilities().mayBuild) {
             ItemStack itemstack = player.getItemInHand(hand);
-            EquipmentSlotType equipmentslottype = getEquipmentSlotForItem(itemstack);
+            EquipmentSlot equipmentslottype = getEquipmentSlotForItem(itemstack);
 
             Item item = itemstack.getItem();
 
             //special items
-            if (item instanceof BannerItem || this.isPumpkin(item) || item.canEquip(itemstack, EquipmentSlotType.HEAD, this)) {
-                equipmentslottype = EquipmentSlotType.HEAD;
+            if (item instanceof BannerItem || this.isPumpkin(item) || item.canEquip(itemstack, EquipmentSlot.HEAD, this)) {
+                equipmentslottype = EquipmentSlot.HEAD;
             }
 
 
             // empty hand -> unequip
-            if (itemstack.isEmpty() && hand == Hand.MAIN_HAND) {
+            if (itemstack.isEmpty() && hand == InteractionHand.MAIN_HAND) {
                 equipmentslottype = this.getClickedSlot(vec);
                 if (this.hasItemInSlot(equipmentslottype)) {
-                    if (player.level.isClientSide) return ActionResultType.CONSUME;
+                    if (player.level.isClientSide) return InteractionResult.CONSUME;
                     this.unequipArmor(player, equipmentslottype, itemstack, hand);
                     invchanged = true;
 
                 }
             }
             // armor item in hand -> equip/swap
-            else if (equipmentslottype.getType() == EquipmentSlotType.Group.ARMOR) {
-                if (player.level.isClientSide) return ActionResultType.CONSUME;
+            else if (equipmentslottype.getType() == EquipmentSlot.Type.ARMOR) {
+                if (player.level.isClientSide) return InteractionResult.CONSUME;
                 this.equipArmor(player, equipmentslottype, itemstack, hand);
                 invchanged = true;
 
@@ -170,13 +184,13 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
             //remove sack
             else if (item instanceof ShearsItem) {
                 if (!this.sheared) {
-                    if (player.level.isClientSide) return ActionResultType.CONSUME;
+                    if (player.level.isClientSide) return InteractionResult.CONSUME;
                     this.sheared = true;
                     if (!this.level.isClientSide) {
-                        NetworkHandler.sendToAllTracking(this, (ServerWorld) this.level,
+                        NetworkHandler.sendToAllTracking(this, (ServerLevel) this.level,
                                 new NetworkHandler.PacketChangeSkin(this.getId(), true));
                     }
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
 
@@ -184,18 +198,18 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
             if (invchanged) {
                 this.setLastArmorItem(equipmentslottype, itemstack);
                 if (!this.level.isClientSide) {
-                    NetworkHandler.sendToAllTracking(this, (ServerWorld) this.level, new NetworkHandler.PacketSyncEquip(this.getId(), equipmentslottype.getIndex(), this.getItemBySlot(equipmentslottype)));
+                    NetworkHandler.sendToAllTracking(this, (ServerLevel) this.level, new NetworkHandler.PacketSyncEquip(this.getId(), equipmentslottype.getIndex(), this.getItemBySlot(equipmentslottype)));
                 }
                 //this.applyEquipmentModifiers();
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
 
 
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
-    private void unequipArmor(PlayerEntity player, EquipmentSlotType slot, ItemStack stack, Hand hand) {
+    private void unequipArmor(Player player, EquipmentSlot slot, ItemStack stack, InteractionHand hand) {
         // set slot to stack which is empty stack
         ItemStack itemstack = this.getItemBySlot(slot);
         ItemStack itemstack2 = itemstack.copy();
@@ -207,24 +221,24 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         //now done here^
         this.getAttributes().removeAttributeModifiers(itemstack2.getAttributeModifiers(slot));
         //clear mob type
-        if (slot == EquipmentSlotType.HEAD) this.mobType = MobAttribute.UNDEFINED;
+        if (slot == EquipmentSlot.HEAD) this.mobType = MobAttribute.UNDEFINED;
 
     }
 
-    private void equipArmor(PlayerEntity player, EquipmentSlotType slot, ItemStack stack, Hand hand) {
+    private void equipArmor(Player player, EquipmentSlot slot, ItemStack stack, InteractionHand hand) {
         ItemStack currentItem = this.getItemBySlot(slot);
         ItemStack newItem = stack.copy();
         newItem.setCount(1);
 
-        player.setItemInHand(hand, DrinkHelper.createFilledResult(stack.copy(), player, currentItem, player.isCreative()));
+        player.setItemInHand(hand, ItemUtils.createFilledResult(stack.copy(), player, currentItem, player.isCreative()));
 
-        this.playEquipSound(newItem);
+        this.equipEventAndSound(newItem);
         this.setItemSlot(slot, newItem);
 
         //this.applyEquipmentModifiers();
         //now done here^
         this.getAttributes().addTransientAttributeModifiers(newItem.getAttributeModifiers(slot));
-        if (slot == EquipmentSlotType.HEAD) {
+        if (slot == EquipmentSlot.HEAD) {
             //add mob type
             if (this.isUndeadSkull(newItem)) this.mobType = MobAttribute.UNDEAD;
             else if (newItem.getItem() == Items.TURTLE_HELMET) this.mobType = MobAttribute.WATER;
@@ -255,24 +269,24 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         return this.mobType == MobAttribute.SCARECROW;
     }
 
-    private EquipmentSlotType getClickedSlot(Vector3d p_190772_1_) {
-        EquipmentSlotType equipmentslottype = EquipmentSlotType.MAINHAND;
+    private EquipmentSlot getClickedSlot(Vec3 p_190772_1_) {
+        EquipmentSlot equipmentslottype = EquipmentSlot.MAINHAND;
         double d0 = p_190772_1_.y;
-        EquipmentSlotType equipmentslottype1 = EquipmentSlotType.FEET;
+        EquipmentSlot equipmentslottype1 = EquipmentSlot.FEET;
         if (d0 >= 0.1D && d0 < 0.1D + (0.45D) && this.hasItemInSlot(equipmentslottype1)) {
-            equipmentslottype = EquipmentSlotType.FEET;
-        } else if (d0 >= 0.9D + (0.0D) && d0 < 0.9D + (0.7D) && this.hasItemInSlot(EquipmentSlotType.CHEST)) {
-            equipmentslottype = EquipmentSlotType.CHEST;
-        } else if (d0 >= 0.4D && d0 < 0.4D + (0.8D) && this.hasItemInSlot(EquipmentSlotType.LEGS)) {
-            equipmentslottype = EquipmentSlotType.LEGS;
-        } else if (d0 >= 1.6D && this.hasItemInSlot(EquipmentSlotType.HEAD)) {
-            equipmentslottype = EquipmentSlotType.HEAD;
+            equipmentslottype = EquipmentSlot.FEET;
+        } else if (d0 >= 0.9D + (0.0D) && d0 < 0.9D + (0.7D) && this.hasItemInSlot(EquipmentSlot.CHEST)) {
+            equipmentslottype = EquipmentSlot.CHEST;
+        } else if (d0 >= 0.4D && d0 < 0.4D + (0.8D) && this.hasItemInSlot(EquipmentSlot.LEGS)) {
+            equipmentslottype = EquipmentSlot.LEGS;
+        } else if (d0 >= 1.6D && this.hasItemInSlot(EquipmentSlot.HEAD)) {
+            equipmentslottype = EquipmentSlot.HEAD;
         }
         return equipmentslottype;
     }
 
 
-    private void setLastArmorItem(EquipmentSlotType type, ItemStack stack) {
+    private void setLastArmorItem(EquipmentSlot type, ItemStack stack) {
         this.lastArmorItem.set(type.getIndex(), stack);
     }
 
@@ -280,9 +294,9 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         //living entity code here. apparently every entity does this check every tick.
         //trying instead to run it only when needed instead
         if (!this.level.isClientSide) {
-            for (EquipmentSlotType equipmentslottype : EquipmentSlotType.values()) {
+            for (EquipmentSlot equipmentslottype : EquipmentSlot.values()) {
                 ItemStack itemstack;
-                if (equipmentslottype.getType() == EquipmentSlotType.Group.ARMOR) {
+                if (equipmentslottype.getType() == EquipmentSlot.Type.ARMOR) {
                     itemstack = this.lastArmorItem.get(equipmentslottype.getIndex());
 
                     ItemStack itemstack1 = this.getItemBySlot(equipmentslottype);
@@ -306,8 +320,8 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
     @Override
     public void dropEquipment() {
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            if (slot.getType() != EquipmentSlotType.Group.ARMOR) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() != EquipmentSlot.Type.ARMOR) {
                 continue;
             }
             ItemStack armor = getItemBySlot(slot);
@@ -326,10 +340,10 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getDeathSound(),
                     this.getSoundSource(), 1.0F, 1.0F);
 
-            ((ServerWorld) this.level).sendParticles(new BlockParticleData(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()),
+            ((ServerLevel) this.level).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()),
                     this.getX(), this.getY(0.6666666666666666D), this.getZ(), 10, (this.getBbWidth() / 4.0F),
                     (this.getBbHeight() / 4.0F), (this.getBbWidth() / 4.0F), 0.05D);
-            this.remove();
+            this.remove(RemovalReason.KILLED);
         }
     }
 
@@ -339,7 +353,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
+    public ItemStack getPickedResult(HitResult target) {
         return new ItemStack(Registry.DUMMY_ITEM.get());
     }
 
@@ -354,31 +368,31 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
         //not immune to void damage, immune to drown, wall
         if (source == DamageSource.OUT_OF_WORLD) {
-            this.remove();
+            this.remove(RemovalReason.KILLED);
             return true;
         }
         if (source == DamageSource.DROWN || source == DamageSource.IN_WALL) return false;
         //workaround for wither boss, otherwise it would keep targeting the dummy forever
-        if (source.getDirectEntity() instanceof WitherEntity || source.getEntity() instanceof WitherEntity) {
+        if (source.getDirectEntity() instanceof WitherBoss || source.getEntity() instanceof WitherBoss) {
             this.dismantle(true);
             return true;
 
         }
 
         //lots of living entity code here
-        if (source.isFire() && this.hasEffect(Effects.FIRE_RESISTANCE)) return false;
+        if (source.isFire() && this.hasEffect(MobEffects.FIRE_RESISTANCE)) return false;
 
-        if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemBySlot(EquipmentSlotType.HEAD).isEmpty()) {
+        if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
             //this.getItemStackFromSlot(EquipmentSlotType.HEAD).damageItem((int)(damage * 4.0F + this.rand.nextFloat() * damage * 2.0F), this, (p_213341_0_) -> p_213341_0_.sendBreakAnimation(EquipmentSlotType.HEAD));
             damage *= 0.75F;
         }
 
 
         // dismantling + adding players to dps message list
-        if (source.msgId.equals("player") || source.getEntity() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getEntity();
+        if (source.msgId.equals("player") || source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
             if (!level.isClientSide) {
-                ServerPlayerEntity sp = (ServerPlayerEntity) player;
+                ServerPlayer sp = (ServerPlayer) player;
                 if (!this.currentlyAttacking.contains(sp)) {
                     this.currentlyAttacking.add(sp);
                 }
@@ -414,7 +428,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         } else {
 
             this.playHurtSound(source);
-            //if i'm not on invulnerability frame deal normal damage and reset cooldowns
+            //if I'm not on invulnerability frame deal normal damage and reset cooldowns
 
             this.lastDamage = damage;
             this.invulnerableTime = 20;
@@ -469,7 +483,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
         //I could have used synced entity attributes here
         //TODO: replace with entity attributes
-        NetworkHandler.sendToAllTracking(this, (ServerWorld) this.level, new NetworkHandler.PacketDamageNumber(this.getId(), damage, this.animationPosition));
+        NetworkHandler.sendToAllTracking(this, (ServerLevel) this.level, new NetworkHandler.PacketDamageNumber(this.getId(), damage, this.animationPosition));
 
         // damage numebrssss
         DummyNumberEntity number = new DummyNumberEntity(damage, type, this.damageNumberPos++, this.level);
@@ -497,7 +511,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         BlockPos onPos = this.getOnPos();
 
         //check if on stable ground. used for automation
-        if (this.level != null && this.level.getGameTime() % 20L == 0L && !this.level.isClientSide) {
+        if (this.level.getGameTime() % 20L == 0L && !this.level.isClientSide) {
             if (level.isEmptyBlock(onPos)) {
                 this.dismantle(true);
                 return;
@@ -505,7 +519,8 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         }
 
         this.setNoGravity(true);
-        this.level.getBlockState(onPos).getBlock().stepOn(this.level, onPos, this);
+        BlockState onState = this.level.getBlockState(onPos);
+        onState.getBlock().stepOn(this.level, onPos, onState, this);
 
 
         //used for fire damage, poison damage etc.
@@ -515,7 +530,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
 
         this.level.getProfiler().push("travel");
-        this.travel(new Vector3d(this.xxa, this.yya, this.zza));
+        this.travel(new Vec3(this.xxa, this.yya, this.zza));
         this.level.getProfiler().pop();
 
 
@@ -552,13 +567,6 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
             }
 
         } else {
-            this.setSharedFlag(6, this.isGlowing());
-            if (!this.glowing) {
-                boolean flag = this.hasEffect(Effects.GLOWING);
-                if (this.getSharedFlag(6) != flag) {
-                    this.setSharedFlag(6, flag);
-                }
-            }
 
             //here is for visially show dps on status mesasge
             if (this.damageTaken > 0) {
@@ -577,9 +585,9 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
                     // it's not actual DPS but "damage per tick scaled to seconds".. but meh.
                     float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
                     float dps = damageTaken / seconds;
-                    for (ServerPlayerEntity p : this.currentlyAttacking) {
+                    for (ServerPlayer p : this.currentlyAttacking) {
                         if (p.distanceTo(this) < 64)
-                            p.displayClientMessage(new TranslationTextComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
+                            p.displayClientMessage(new TranslatableComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
                     }
 
                 }
@@ -597,11 +605,11 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
 
     @Override
-    public void setDeltaMovement(Vector3d motionIn) {
+    public void setDeltaMovement(Vec3 motionIn) {
     }
 
     @Override
-    public void knockback(float strength, double ratioX, double ratioZ) {
+    public void knockback(double p_147241_, double p_147242_, double p_147243_) {
     }
 
     @Override
@@ -630,7 +638,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     @Override
-    public boolean causeFallDamage(float l, float d) {
+    public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
         return false;
     }
 
@@ -663,12 +671,12 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
     }
 
     @Override
-    public CreatureAttribute getMobType() {
+    public MobType getMobType() {
         return this.mobType.get();
     }
 
-    public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
-        return MobEntity.createMobAttributes()
+    public static AttributeSupplier.Builder setCustomAttributes() {
+        return Mob.createMobAttributes()
                 .add(Attributes.FOLLOW_RANGE, 16.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0D)
                 .add(Attributes.MAX_HEALTH, 40D)
@@ -686,20 +694,14 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         ARTHROPOD,
         SCARECROW;
 
-        public CreatureAttribute get() {
-            switch (this) {
-                default:
-                case UNDEFINED:
-                    return CreatureAttribute.UNDEFINED;
-                case UNDEAD:
-                    return CreatureAttribute.UNDEAD;
-                case WATER:
-                    return CreatureAttribute.WATER;
-                case ILLAGER:
-                    return CreatureAttribute.ILLAGER;
-                case ARTHROPOD:
-                    return CreatureAttribute.ARTHROPOD;
-            }
+        public MobType get() {
+            return switch (this) {
+                case UNDEFINED, SCARECROW -> MobType.UNDEFINED;
+                case UNDEAD -> MobType.UNDEAD;
+                case WATER -> MobType.WATER;
+                case ILLAGER -> MobType.ILLAGER;
+                case ARTHROPOD -> MobType.ARTHROPOD;
+            };
         }
     }
 
@@ -720,33 +722,20 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
 
         //only client
         public int getColor() {
-            switch (this) {
-                case CRIT:
-                    return Configs.cached.DAMAGE_CRIT;
-                case FIRE:
-                    return Configs.cached.DAMAGE_FIRE;
-                case MAGIC:
-                    return Configs.cached.DAMAGE_MAGIC;
-                case CACTUS:
-                    return Configs.cached.DAMAGE_CACTUS;
-                case DRAGON:
-                    return Configs.cached.DAMAGE_DRAGON;
-                case WITHER:
-                    return Configs.cached.DAMAGE_WITHER;
-                default:
-                case GENERIC:
-                    return Configs.cached.DAMAGE_GENERIC;
-                case TRIDENT:
-                    return Configs.cached.DAMAGE_TRIDENT;
-                case EXPLOSION:
-                    return Configs.cached.DAMAGE_EXPLOSION;
-                case IND_MAGIC:
-                    return Configs.cached.DAMAGE_IND_MAGIC;
-                case LIGHTNING:
-                    return Configs.cached.DAMAGE_LIGHTNING;
-                case TRUE:
-                    return Configs.cached.DAMAGE_TRUE;
-            }
+            return switch (this) {
+                case CRIT -> Configs.cached.DAMAGE_CRIT;
+                case FIRE -> Configs.cached.DAMAGE_FIRE;
+                case MAGIC -> Configs.cached.DAMAGE_MAGIC;
+                case CACTUS -> Configs.cached.DAMAGE_CACTUS;
+                case DRAGON -> Configs.cached.DAMAGE_DRAGON;
+                case WITHER -> Configs.cached.DAMAGE_WITHER;
+                case GENERIC -> Configs.cached.DAMAGE_GENERIC;
+                case TRIDENT -> Configs.cached.DAMAGE_TRIDENT;
+                case EXPLOSION -> Configs.cached.DAMAGE_EXPLOSION;
+                case IND_MAGIC -> Configs.cached.DAMAGE_IND_MAGIC;
+                case LIGHTNING -> Configs.cached.DAMAGE_LIGHTNING;
+                case TRUE -> Configs.cached.DAMAGE_TRUE;
+            };
         }
     }
 
@@ -762,8 +751,7 @@ public class TargetDummyEntity extends MobEntity implements IEntityAdditionalSpa
         if (source == DamageSource.HOT_FLOOR || source == DamageSource.LAVA || source == DamageSource.ON_FIRE
                 || source == DamageSource.IN_FIRE || source.isFire()) return DamageType.FIRE;
         if (source == DamageSource.MAGIC || source.isMagic()) {
-            //would really like to detect poison damage but i don't think there's simple way
-
+            //would really like to detect poison damage, but I don't think there's a simple way
             return DamageType.MAGIC;
         }
         if (source == DamageSource.LIGHTNING_BOLT) return DamageType.LIGHTNING;

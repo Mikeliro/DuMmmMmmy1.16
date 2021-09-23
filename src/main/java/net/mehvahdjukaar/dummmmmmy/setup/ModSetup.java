@@ -2,15 +2,13 @@ package net.mehvahdjukaar.dummmmmmy.setup;
 
 import net.mehvahdjukaar.dummmmmmy.common.NetworkHandler;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.dispenser.IDispenseItemBehavior;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -31,11 +29,11 @@ public class ModSetup {
         event.put(Registry.TARGET_DUMMY.get(), TargetDummyEntity.setCustomAttributes().build());
     }
 
-    public static class SpawnDummyBehavior implements IDispenseItemBehavior {
+    public static class SpawnDummyBehavior implements DispenseItemBehavior {
         @Override
-        public ItemStack dispense(IBlockSource dispenser, ItemStack itemStack) {
+        public ItemStack dispense(BlockSource dispenser, ItemStack itemStack) {
 
-            World world = dispenser.getLevel();
+            Level world = dispenser.getLevel();
             Direction direction = dispenser.getBlockState().getValue(DispenserBlock.FACING);
             BlockPos pos = dispenser.getPos().relative(direction);
 

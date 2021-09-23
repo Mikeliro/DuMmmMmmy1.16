@@ -4,12 +4,12 @@ import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.entity.DummyNumberEntity;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.mehvahdjukaar.dummmmmmy.item.TargetDummyItem;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -27,7 +27,7 @@ public class Registry {
 
     public static final String TARGET_DUMMY_NAME = "target_dummy";
     public static final RegistryObject<EntityType<TargetDummyEntity>> TARGET_DUMMY = ENTITIES.register(TARGET_DUMMY_NAME, ()->(
-            EntityType.Builder.<TargetDummyEntity>of(TargetDummyEntity::new, EntityClassification.MISC)
+            EntityType.Builder.<TargetDummyEntity>of(TargetDummyEntity::new, MobCategory.MISC)
                     .setShouldReceiveVelocityUpdates(true)
                     .setTrackingRange(64)
                     .setCustomClientFactory(TargetDummyEntity::new)
@@ -37,7 +37,7 @@ public class Registry {
 
     public static final String DUMMY_NUMBER_NAME = "dummy_number";
     public static final RegistryObject<EntityType<DummyNumberEntity>> DUMMY_NUMBER = ENTITIES.register(DUMMY_NUMBER_NAME, ()->(
-            EntityType.Builder.<DummyNumberEntity>of(DummyNumberEntity::new, EntityClassification.MISC)
+            EntityType.Builder.<DummyNumberEntity>of(DummyNumberEntity::new, MobCategory.MISC)
                     .setShouldReceiveVelocityUpdates(true)
                     .setTrackingRange(64)
                     .setCustomClientFactory(DummyNumberEntity::new)
@@ -47,7 +47,7 @@ public class Registry {
 
     public static final String DUMMY_ITEM_NAME = "target_dummy_placer";
     public static final RegistryObject<Item> DUMMY_ITEM = ITEMS.register(DUMMY_ITEM_NAME, ()-> new TargetDummyItem(
-            new Item.Properties().tab(ItemGroup.TAB_COMBAT).stacksTo(16)));
+            new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).stacksTo(16)));
 
 
 }

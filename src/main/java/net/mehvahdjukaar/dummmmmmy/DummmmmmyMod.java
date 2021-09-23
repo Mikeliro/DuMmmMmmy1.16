@@ -3,10 +3,10 @@
 package net.mehvahdjukaar.dummmmmmy;
 
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
-import net.mehvahdjukaar.dummmmmmy.setup.ClientSetup;
+import net.mehvahdjukaar.dummmmmmy.setup.ClientHandler;
 import net.mehvahdjukaar.dummmmmmy.setup.ModSetup;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -24,6 +24,10 @@ public class DummmmmmyMod {
 
 	public static final Logger LOGGER = LogManager.getLogger();
 
+	public static ResourceLocation res(String name){
+		return new ResourceLocation(MOD_ID,name);
+	}
+
 	public DummmmmmyMod() {
 
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Configs.CLIENT_CONFIG);
@@ -35,9 +39,12 @@ public class DummmmmmyMod {
 
 		Registry.init(bus);
 
+		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.register(ClientHandler.class));
+
 		bus.addListener(ModSetup::init);
 
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientSetup::init));
 	}
+
+
 
 }

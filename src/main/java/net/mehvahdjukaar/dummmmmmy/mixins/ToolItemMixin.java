@@ -2,19 +2,15 @@ package net.mehvahdjukaar.dummmmmmy.mixins;
 
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolItem;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.DiggerItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ToolItem.class)
+@Mixin(DiggerItem.class)
 public abstract class ToolItemMixin {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"),

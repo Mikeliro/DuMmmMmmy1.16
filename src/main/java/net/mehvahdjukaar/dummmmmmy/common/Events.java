@@ -2,11 +2,11 @@ package net.mehvahdjukaar.dummmmmmy.common;
 
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -21,8 +21,7 @@ public class Events {
     public static void onEntityCriticalHit(CriticalHitEvent event) {
         if (event != null && event.getEntity() != null) {
             Entity target = event.getTarget();
-            if (event.getDamageModifier() == 1.5 && target instanceof TargetDummyEntity) {
-                TargetDummyEntity dummy = (TargetDummyEntity) target;
+            if (event.getDamageModifier() == 1.5 && target instanceof TargetDummyEntity dummy) {
                 dummy.critical = true;
             }
         }
@@ -30,11 +29,11 @@ public class Events {
 
     public static boolean isScared(Entity entity) {
         String name = entity.getType().getRegistryName().toString();
-        return (entity instanceof AnimalEntity || Configs.cachedServer.WHITELIST.contains(name))
+        return (entity instanceof Animal || Configs.cachedServer.WHITELIST.contains(name))
                 && !Configs.cachedServer.BLACKLIST.contains(name);
     }
 
-    public static boolean isScarecrowInRange(Entity entity, World world) {
+    public static boolean isScarecrowInRange(Entity entity, Level world) {
         return !world.getEntities(Registry.TARGET_DUMMY.get(), entity.getBoundingBox().inflate(10),
                 TargetDummyEntity::isScarecrow).isEmpty();
     }
@@ -42,8 +41,8 @@ public class Events {
     //prevents them from spawning
     @SubscribeEvent
     public static void onCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (!(event.getWorld() instanceof World)) return;
-        World world = event.getEntity().level;
+        if (!(event.getWorld() instanceof Level)) return;
+        Level world = event.getEntity().level;
 
         Entity entity = event.getEntity();
         if (isScared(entity)) {
@@ -56,9 +55,8 @@ public class Events {
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         if (event.getWorld() == null) return;
         Entity e = event.getEntity();
-        if (e instanceof CreatureEntity && isScared(e)) {
+        if (e instanceof PathfinderMob mob && isScared(e)) {
 
-            CreatureEntity mob = (CreatureEntity) e;
             mob.goalSelector.addGoal(0, new AvoidEntityGoal<>(mob, TargetDummyEntity.class,
                     Configs.cachedServer.RADIUS, 1.0D, 1.3D, d -> ((TargetDummyEntity) d).isScarecrow()));
 

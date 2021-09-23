@@ -2,22 +2,24 @@
 package net.mehvahdjukaar.dummmmmmy.item;
 
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
+
+import net.minecraft.world.item.Item.Properties;
 
 public class TargetDummyItem extends Item {
 	public TargetDummyItem(Properties builder) {
@@ -25,13 +27,13 @@ public class TargetDummyItem extends Item {
 	}
 
 	@Override
-	public ActionResultType useOn(ItemUseContext context) {
+	public InteractionResult useOn(UseOnContext context) {
 		Direction direction = context.getClickedFace();
 		if (direction == Direction.DOWN) {
-			return ActionResultType.FAIL;
+			return InteractionResult.FAIL;
 		} else {
-			World world = context.getLevel();
-			BlockItemUseContext blockitemusecontext = new BlockItemUseContext(context);
+			Level world = context.getLevel();
+			BlockPlaceContext blockitemusecontext = new BlockPlaceContext(context);
 			BlockPos blockpos = blockitemusecontext.getClickedPos();
 			BlockPos blockpos1 = blockpos.above();
 			if (blockitemusecontext.canPlace() && world.getBlockState(blockpos1).canBeReplaced(blockitemusecontext)) {
@@ -39,27 +41,27 @@ public class TargetDummyItem extends Item {
 				double d1 = blockpos.getY();
 				double d2 = blockpos.getZ();
 				List<Entity> list = world.getEntities((Entity) null,
-						new AxisAlignedBB(d0, d1, d2, d0 + 1.0D, d1 + 2.0D, d2 + 1.0D));
+						new AABB(d0, d1, d2, d0 + 1.0D, d1 + 2.0D, d2 + 1.0D));
 				if (!list.isEmpty()) {
-					return ActionResultType.FAIL;
+					return InteractionResult.FAIL;
 				} else {
 					ItemStack itemstack = context.getItemInHand();
 					if (!world.isClientSide) {
 						world.removeBlock(blockpos, false);
 						world.removeBlock(blockpos1, false);
 						TargetDummyEntity dummy = new TargetDummyEntity(world);
-						float f = (float) MathHelper.floor((MathHelper.wrapDegrees(context.getRotation() - 180.0F) + 11.25) / 22.5F) * 22.5F;
+						float f = (float) Mth.floor((Mth.wrapDegrees(context.getRotation() - 180.0F) + 11.25) / 22.5F) * 22.5F;
 						dummy.moveTo(d0 + 0.5D, d1, d2 + 0.5D, f, 0.0F);
 						EntityType.updateCustomEntityTag(world, context.getPlayer(), dummy, itemstack.getTag());
 						world.addFreshEntity(dummy);
 						world.playSound(null, dummy.getX(), dummy.getY(), dummy.getZ(), SoundEvents.BAMBOO_PLACE,
-								SoundCategory.BLOCKS, 0.75F, 0.8F);
+								SoundSource.BLOCKS, 0.75F, 0.8F);
 					}
 					itemstack.shrink(1);
-					return ActionResultType.SUCCESS;
+					return InteractionResult.SUCCESS;
 				}
 			} else {
-				return ActionResultType.FAIL;
+				return InteractionResult.FAIL;
 			}
 		}
 	}

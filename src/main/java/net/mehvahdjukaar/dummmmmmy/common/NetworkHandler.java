@@ -4,16 +4,16 @@ package net.mehvahdjukaar.dummmmmmy.common;
 import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
@@ -47,7 +47,7 @@ public class NetworkHandler {
     private interface Message {
     }
 
-    public static void sendToAllTracking(Entity entity, ServerWorld world, Message message) {
+    public static void sendToAllTracking(Entity entity, ServerLevel world, Message message) {
         world.getChunkSource().broadcast(entity, INSTANCE.toVanillaPacket(message, NetworkDirection.PLAY_TO_CLIENT));
     }
 
@@ -56,7 +56,7 @@ public class NetworkHandler {
         private final float damage;
         private final float shake;
 
-        public PacketDamageNumber(PacketBuffer buf) {
+        public PacketDamageNumber(FriendlyByteBuf buf) {
             this.entityID = buf.readInt();
             this.damage = buf.readFloat();
             this.shake = buf.readFloat();
@@ -68,7 +68,7 @@ public class NetworkHandler {
             this.shake = shakeAmount;
         }
 
-        public void toBytes(PacketBuffer buf) {
+        public void toBytes(FriendlyByteBuf buf) {
             buf.writeInt(this.entityID);
             buf.writeFloat(this.damage);
             buf.writeFloat(this.shake);
@@ -77,8 +77,7 @@ public class NetworkHandler {
         public void handle(Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
                 Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
-                if (entity instanceof TargetDummyEntity) {
-                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
+                if (entity instanceof TargetDummyEntity dummy) {
                     dummy.animationPosition = shake;
                 }
             });
@@ -92,7 +91,7 @@ public class NetworkHandler {
         private final int slotId;
         private final ItemStack itemstack;
 
-        public PacketSyncEquip(PacketBuffer buf) {
+        public PacketSyncEquip(FriendlyByteBuf buf) {
             this.entityID = buf.readInt();
             this.slotId = buf.readInt();
 
@@ -105,7 +104,7 @@ public class NetworkHandler {
             this.itemstack = itemstack.copy();
         }
 
-        public void toBytes(PacketBuffer buf) {
+        public void toBytes(FriendlyByteBuf buf) {
             buf.writeInt(this.entityID);
             buf.writeInt(slotId);
             buf.writeItem(itemstack);
@@ -114,9 +113,8 @@ public class NetworkHandler {
         public void handle(Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
                 Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
-                if (entity instanceof TargetDummyEntity) {
-                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
-                    dummy.setItemSlot(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, this.slotId), this.itemstack);
+                if (entity instanceof TargetDummyEntity dummy) {
+                    dummy.setItemSlot(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, this.slotId), this.itemstack);
                 }
             });
             ctx.get().setPacketHandled(true);
@@ -128,7 +126,7 @@ public class NetworkHandler {
         private final int entityID;
         private final boolean skin;
 
-        public PacketChangeSkin(PacketBuffer buf) {
+        public PacketChangeSkin(FriendlyByteBuf buf) {
             this.entityID = buf.readInt();
             this.skin = buf.readBoolean();
         }
@@ -138,7 +136,7 @@ public class NetworkHandler {
             this.skin = skin;
         }
 
-        public void toBytes(PacketBuffer buf) {
+        public void toBytes(FriendlyByteBuf buf) {
             buf.writeInt(this.entityID);
             buf.writeBoolean(this.skin);
         }
@@ -146,8 +144,7 @@ public class NetworkHandler {
         public void handle(Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
                 Entity entity = Minecraft.getInstance().level.getEntity(this.entityID);
-                if (entity instanceof TargetDummyEntity) {
-                    TargetDummyEntity dummy = (TargetDummyEntity) entity;
+                if (entity instanceof TargetDummyEntity dummy) {
                     dummy.sheared = this.skin;
                 }
             });

@@ -3,9 +3,10 @@ package net.mehvahdjukaar.dummmmmmy.common;
 
 import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.awt.*;
 import java.util.Collections;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class Configs {
 
-    public static void reloadConfigsEvent(ModConfig.ModConfigEvent event) {
+    public static void reloadConfigsEvent(ModConfigEvent event) {
         if (event.getConfig().getSpec() == CLIENT_CONFIG)
             cached.refresh();
         else if (event.getConfig().getSpec() == SERVER_CONFIG) {
@@ -176,7 +177,11 @@ public class Configs {
             ANIMATION_INTENSITY = Configs.ANIMATION_INTENSITY.get();
             SHOW_HEARTHS = Configs.SHOW_HEARTHS.get();
             DYNAMIC_DPS = Configs.DYNAMIC_DPS.get();
-            SKIN = Configs.SKIN.get();
+            try {
+                SKIN = Configs.SKIN.get();
+            }catch (Exception e){
+                SKIN = SkinType.DEFAULT;
+            }
 
             DAMAGE_GENERIC = parseHex(Configs.DAMAGE_GENERIC.get());
             DAMAGE_CRIT = parseHex(Configs.DAMAGE_CRIT.get());
