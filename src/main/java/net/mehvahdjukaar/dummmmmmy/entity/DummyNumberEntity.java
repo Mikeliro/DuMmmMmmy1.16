@@ -25,7 +25,7 @@ import java.util.Random;
 
 
 public class DummyNumberEntity extends Entity implements IEntityAdditionalSpawnData {
-    protected static final int MAX_AGE = 40;
+    protected static final int MAX_AGE = 35;
     public int age;
     private float number = 69420;
     protected float speed = 1;
@@ -123,7 +123,7 @@ public class DummyNumberEntity extends Entity implements IEntityAdditionalSpawnD
             this.prevDx = this.dx;
             this.dx += this.speedX;
             // this.speed / 500d;
-            //spawn numbers in a sort of elliple centered on his torso
+            //spawn numbers in a sort of ellipse centered on his torso
             if (Math.sqrt(Math.pow(this.dx * 1.5, 2) + Math.pow(this.dy - 1, 2)) < 1.9 - 1) {
 
                 speed = speed / 2;

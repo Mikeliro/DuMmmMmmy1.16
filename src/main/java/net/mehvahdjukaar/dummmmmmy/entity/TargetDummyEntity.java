@@ -539,6 +539,7 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
         this.level.getProfiler().pop();
         //end living tick stuff
 
+        /*
         this.level.getProfiler().push("rest");
         try {
             this.checkInsideBlocks();
@@ -549,6 +550,8 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
             throw new ReportedException(crashreport);
         }
         this.level.getProfiler().pop();
+        */
+
 
         if (this.level.isClientSide) {
             //set to 0 to disable red glow that happens when hurt

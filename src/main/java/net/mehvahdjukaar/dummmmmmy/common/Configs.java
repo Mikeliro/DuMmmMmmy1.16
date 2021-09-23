@@ -36,7 +36,7 @@ public class Configs {
     private static final Color COLOR_TRIDENT = new Color(0x00FF9D);
     private static final Color COLOR_FIRE = new Color(0xFF7700);
     private static final Color COLOR_LIGHTNING = new Color(0xFFF200);
-    private static final Color COLOR_CACTUS = new Color(0x048500);
+    private static final Color COLOR_CACTUS = new Color(0x0FA209);
     private static final Color COLOR_TRUE = new Color(0x910038);
 
     public static ForgeConfigSpec CLIENT_CONFIG;

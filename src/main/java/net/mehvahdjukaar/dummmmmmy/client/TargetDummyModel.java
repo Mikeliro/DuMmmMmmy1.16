@@ -24,30 +24,8 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
         standPlate = modelPart.getChild("stand");
     }
 
-
-    public static LayerDefinition createLayer(float size) {
-        CubeDeformation deformation = new CubeDeformation(size);
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(deformation, 0.0F);
-        PartDefinition partdefinition = meshdefinition.getRoot();
-        partdefinition.addOrReplaceChild("stand", CubeListBuilder.create()
-                .texOffs(0, 32)
-                .addBox(-7.0F, 12F, -7.0F, 14F, 1F, 14F, deformation),
-                PartPose.offset(0.0F, 11.0F, 0.0F));
-
-        partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create()
-                .texOffs(40, 16)
-                .addBox(-3.0F, 1.0F, -2.0F, 4.0F, 8F, 4.0F, deformation.extend(0.01f)),
-                PartPose.offset(-2.5F, 2.0F, -0.005F));
-
-        partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create()
-                .texOffs(40, 16).mirror()
-                .addBox(-1.0F, 1.0F, -2.0F, 4.0F, 8F, 4.0F, deformation.extend(0.01f)),
-                PartPose.offset(2.5F, 2.0F, -0.005F));
-
-        return LayerDefinition.create(meshdefinition, 64, 64);
-    }
-
-    public static LayerDefinition createArmorLayer(float size) {
+    //TODO: maybe add back -1 y offset
+    public static LayerDefinition createMesh(float size, int textHeight) {
         CubeDeformation deformation = new CubeDeformation(size);
         MeshDefinition meshdefinition = HumanoidModel.createMesh(deformation, 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
@@ -66,84 +44,31 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
                         .addBox(-1.0F, 1.0F, -2.0F, 4.0F, 8F, 4.0F, deformation.extend(0.01f)),
                 PartPose.offset(2.5F, 2.0F, -0.005F));
 
-        return LayerDefinition.create(meshdefinition, 64, 32);
+        partdefinition.addOrReplaceChild("left_leg", CubeListBuilder.create()
+                .texOffs( 0, 16)
+                .addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, deformation.extend(size != 0 ? -0.01f : 0)),
+                PartPose.offset(0F, 12.0F, 0.0F));
+
+        return LayerDefinition.create(meshdefinition, 64, textHeight);
     }
 
-
-    /*
-
-    //armor layer constructor
-    public TargetDummyModel(EquipmentSlot slot) {
-        super(1);
-        this.slot = slot;
-        float size = 1;
-        if(slot == EquipmentSlot.LEGS) size = 0.5f;
-        constructor(size);
-        this.standPlate.visible = false;
-        this.rightLeg.visible = false;
-    }
-    //normal model constructor. had to make two cause it was causing crashes with mods.
-    public TargetDummyModel() {
-        super(0,0,64,64);
-        this.constructor(0);
-    }
-
-
-    public void constructor(float size){
-
-        float yOffsetIn =-1;
-        //scale leg to prevent some clipping
-        float legOffset = -0.01f;
-
-        this.standPlate = new ModelPart(this, 0, 32);
-        this.standPlate.addBox(-7.0F, 12F, -7.0F, 14, 1, 14, size);
-        this.standPlate.setPos(0F, 11F , 0.0F);
-
-        this.rightArm = new ModelPart(this, 40, 16);
-        this.rightArm.addBox(-3.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
-        this.rightArm.setPos(-2.5F, 2.0F + yOffsetIn, -0.005F);
-        this.leftArm = new ModelPart(this, 40, 16);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0F, 1.0F, -2.0F, 4, 8, 4.0F, size+0.01f);
-        this.leftArm.setPos(2.5F, 2.0F + yOffsetIn, -0.005F);
-
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size);
-        this.head.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
-
-        //mod support. I'm not using this
-        this.hat = new ModelPart(this, 32, 0);
-        this.hat.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, size + 0.5F);
-        this.hat.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
-
-        this.leftLeg = new ModelPart(this, 0, 16);
-        this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, size+legOffset);
-        this.leftLeg.setPos(0F, 12.0F + yOffsetIn, 0.0F);
-        this.rightLeg = new ModelPart(this, 0, 0);
-
-        this.body = new ModelPart(this, 16, 16);
-        this.body.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, size );
-        this.body.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
-
-    }
-
-*/
+    //don't touch. it just works
     public void rotateModelX(ModelPart model, float nrx, float nry, float nrz, float angle){
-        Vec3 oldrot = new Vec3(model.x, model.y, model.z);
-        Vec3 actualrot = new Vec3(nrx, nry, nrz);
+        Vec3 oldRot = new Vec3(model.x, model.y, model.z);
+        Vec3 actualRot = new Vec3(nrx, nry, nrz);
 
-        Vec3 newrot = actualrot.add(oldrot.subtract(actualrot).xRot(-angle));
+        Vec3 newRot = actualRot.add(oldRot.subtract(actualRot).xRot(-angle));
 
-        model.setPos((float) newrot.x(), (float) newrot.y(), (float) newrot.z());
+        model.setPos((float) newRot.x(), (float) newRot.y(), (float) newRot.z());
         model.xRot = angle;
     }
     public void rotateModelY(ModelPart model, float nrx, float nry, float nrz, float angle, int mult){
-        Vec3 oldrot = new Vec3(model.x, model.y, model.z);
-        Vec3 actualrot = new Vec3(nrx, nry, nrz);
+        Vec3 oldRot = new Vec3(model.x, model.y, model.z);
+        Vec3 actualRot = new Vec3(nrx, nry, nrz);
 
-        Vec3 newrot = actualrot.add(oldrot.subtract(actualrot).xRot(-angle));
+        Vec3 newRot = actualRot.add(oldRot.subtract(actualRot).xRot(-angle));
 
-        model.setPos((float) newrot.x(), (float) newrot.y(), (float) newrot.z());
+        model.setPos((float) newRot.x(), (float) newRot.y(), (float) newRot.z());
         model.yRot = angle*mult;
     }
 
@@ -236,8 +161,6 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
         //swing arm
         this.rightArm.xRot = r * n;
         this.leftArm.xRot = r * n;
-
     }
-
 
 }
