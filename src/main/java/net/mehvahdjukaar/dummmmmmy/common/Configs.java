@@ -88,7 +88,7 @@ public class Configs {
         DAMAGE_FIRE = builder.define("fire", col2String(COLOR_FIRE), Configs::isValidHex);
         DAMAGE_LIGHTNING = builder.define("lightning", col2String(COLOR_LIGHTNING), Configs::isValidHex);
         DAMAGE_CACTUS = builder.define("cactus", col2String(COLOR_CACTUS), Configs::isValidHex);
-        DAMAGE_TRUE = builder.define("true", col2String(COLOR_TRUE), Configs::isValidHex);
+        DAMAGE_TRUE = builder.define("true_damage", col2String(COLOR_TRUE), Configs::isValidHex);
 
         builder.pop();
 
@@ -176,7 +176,11 @@ public class Configs {
             ANIMATION_INTENSITY = Configs.ANIMATION_INTENSITY.get();
             SHOW_HEARTHS = Configs.SHOW_HEARTHS.get();
             DYNAMIC_DPS = Configs.DYNAMIC_DPS.get();
-            SKIN = Configs.SKIN.get();
+            try {
+                SKIN = Configs.SKIN.get();
+            }catch (Exception e){
+                int a = 1;
+            }
 
             DAMAGE_GENERIC = parseHex(Configs.DAMAGE_GENERIC.get());
             DAMAGE_CRIT = parseHex(Configs.DAMAGE_CRIT.get());
