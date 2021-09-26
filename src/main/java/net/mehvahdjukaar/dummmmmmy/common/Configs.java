@@ -74,7 +74,7 @@ public class Configs {
         DYNAMIC_DPS = builder.comment("Does dps message update dynamically or will it only appear after each parse? ").define("dynamicDPS", true);
 
 
-        SKIN = builder.comment("Skin used by the dummy").define("texture", SkinType.DEFAULT);
+        SKIN = builder.comment("Skin used by the dummy").defineEnum("texture", SkinType.DEFAULT);
 
         builder.push("damage_number_colors").comment("hex color for various damage sources");
         DAMAGE_GENERIC = builder.define("genetic", col2String(COLOR_GENERIC), Configs::isValidHex);
