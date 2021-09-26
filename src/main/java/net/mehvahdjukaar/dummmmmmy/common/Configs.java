@@ -75,7 +75,7 @@ public class Configs {
                 .defineEnum("DPS_mode", DpsMode.DYNAMIC);
 
 
-        SKIN = builder.comment("Skin used by the dummy").define("texture", SkinType.DEFAULT);
+        SKIN = builder.comment("Skin used by the dummy").defineEnum("texture", SkinType.DEFAULT);
 
         builder.push("damage_number_colors").comment("hex color for various damage sources");
         DAMAGE_GENERIC = builder.define("genetic", col2String(COLOR_GENERIC), Configs::isValidHex);
@@ -89,7 +89,7 @@ public class Configs {
         DAMAGE_FIRE = builder.define("fire", col2String(COLOR_FIRE), Configs::isValidHex);
         DAMAGE_LIGHTNING = builder.define("lightning", col2String(COLOR_LIGHTNING), Configs::isValidHex);
         DAMAGE_CACTUS = builder.define("cactus", col2String(COLOR_CACTUS), Configs::isValidHex);
-        DAMAGE_TRUE = builder.define("true", col2String(COLOR_TRUE), Configs::isValidHex);
+        DAMAGE_TRUE = builder.define("true_damage", col2String(COLOR_TRUE), Configs::isValidHex);
 
         builder.pop();
 
