@@ -2,13 +2,13 @@ package net.mehvahdjukaar.dummmmmmy.setup;
 
 import net.mehvahdjukaar.dummmmmmy.common.NetworkHandler;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
+import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,12 +21,12 @@ public class ModSetup {
 
         NetworkHandler.registerMessages();
 
-        DispenserBlock.registerBehavior(Registry.DUMMY_ITEM.get(), new SpawnDummyBehavior());
+        DispenserBlock.registerBehavior(ModRegistry.DUMMY_ITEM.get(), new SpawnDummyBehavior());
     }
 
     @SubscribeEvent
     public static void registerEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(Registry.TARGET_DUMMY.get(), TargetDummyEntity.setCustomAttributes().build());
+        event.put(ModRegistry.TARGET_DUMMY.get(), TargetDummyEntity.setCustomAttributes().build());
     }
 
     public static class SpawnDummyBehavior implements DispenseItemBehavior {

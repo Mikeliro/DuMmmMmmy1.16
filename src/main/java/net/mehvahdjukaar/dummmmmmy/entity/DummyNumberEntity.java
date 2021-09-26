@@ -1,25 +1,23 @@
 
 package net.mehvahdjukaar.dummmmmmy.entity;
 
-import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.world.level.block.state.BlockState;
+import net.mehvahdjukaar.dummmmmmy.setup.ModRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fmllegacy.network.FMLPlayMessages;
 import net.minecraftforge.fmllegacy.network.NetworkHooks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -42,7 +40,7 @@ public class DummyNumberEntity extends Entity implements IEntityAdditionalSpawnD
     private final List<Float> list = List.of(0f, -0.25f, 0.12f, -0.12f, 0.25f);
 
     public DummyNumberEntity(FMLPlayMessages.SpawnEntity packet, Level world) {
-        this(Registry.DUMMY_NUMBER.get(), world);
+        this(ModRegistry.DUMMY_NUMBER.get(), world);
     }
 
     public DummyNumberEntity(EntityType<DummyNumberEntity> type, Level world) {
@@ -50,7 +48,7 @@ public class DummyNumberEntity extends Entity implements IEntityAdditionalSpawnD
     }
 
     public DummyNumberEntity(float number, TargetDummyEntity.DamageType color, int type, Level world) {
-        this(Registry.DUMMY_NUMBER.get(), world);
+        this(ModRegistry.DUMMY_NUMBER.get(), world);
         this.number = number;
         this.color = color;
         this.type = type;

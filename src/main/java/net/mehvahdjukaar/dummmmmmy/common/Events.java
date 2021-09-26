@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.dummmmmmy.common;
 
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
-import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.world.entity.PathfinderMob;
+import net.mehvahdjukaar.dummmmmmy.setup.ModRegistry;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
@@ -34,7 +34,7 @@ public class Events {
     }
 
     public static boolean isScarecrowInRange(Entity entity, Level world) {
-        return !world.getEntities(Registry.TARGET_DUMMY.get(), entity.getBoundingBox().inflate(10),
+        return !world.getEntities(ModRegistry.TARGET_DUMMY.get(), entity.getBoundingBox().inflate(10),
                 TargetDummyEntity::isScarecrow).isEmpty();
     }
 

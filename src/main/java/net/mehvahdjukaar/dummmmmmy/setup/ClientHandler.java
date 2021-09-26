@@ -9,6 +9,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientHandler {
@@ -21,7 +22,6 @@ public class ClientHandler {
     public static ModelLayerLocation DUMMY_ARMOR_OUTER = loc("dummy_armor_outer");
     public static ModelLayerLocation DUMMY_ARMOR_INNER = loc("dummy_armor_inner");
 
-
     @SubscribeEvent
     public static void layerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(DUMMY_BODY, () -> TargetDummyModel.createMesh(0, 64));
@@ -31,7 +31,7 @@ public class ClientHandler {
 
     @SubscribeEvent
     public static void entityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(Registry.TARGET_DUMMY.get(), TargetDummyRenderer::new);
-        event.registerEntityRenderer(Registry.DUMMY_NUMBER.get(), NumberRenderer::new);
+        event.registerEntityRenderer(ModRegistry.TARGET_DUMMY.get(), TargetDummyRenderer::new);
+        event.registerEntityRenderer(ModRegistry.DUMMY_NUMBER.get(), NumberRenderer::new);
     }
 }

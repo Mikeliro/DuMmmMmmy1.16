@@ -9,7 +9,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -45,15 +44,15 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
                 PartPose.offset(2.5F, 2.0F, -0.005F));
 
         partdefinition.addOrReplaceChild("left_leg", CubeListBuilder.create()
-                .texOffs( 0, 16)
-                .addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, deformation.extend(size != 0 ? -0.01f : 0)),
+                        .texOffs(0, 16)
+                        .addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, deformation.extend(size != 0 ? -0.01f : 0)),
                 PartPose.offset(0F, 12.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 64, textHeight);
     }
 
     //don't touch. it just works
-    public void rotateModelX(ModelPart model, float nrx, float nry, float nrz, float angle){
+    public void rotateModelX(ModelPart model, float nrx, float nry, float nrz, float angle) {
         Vec3 oldRot = new Vec3(model.x, model.y, model.z);
         Vec3 actualRot = new Vec3(nrx, nry, nrz);
 
@@ -62,19 +61,20 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
         model.setPos((float) newRot.x(), (float) newRot.y(), (float) newRot.z());
         model.xRot = angle;
     }
-    public void rotateModelY(ModelPart model, float nrx, float nry, float nrz, float angle, int mult){
+
+    public void rotateModelY(ModelPart model, float nrx, float nry, float nrz, float angle, int mult) {
         Vec3 oldRot = new Vec3(model.x, model.y, model.z);
         Vec3 actualRot = new Vec3(nrx, nry, nrz);
 
         Vec3 newRot = actualRot.add(oldRot.subtract(actualRot).xRot(-angle));
 
         model.setPos((float) newRot.x(), (float) newRot.y(), (float) newRot.z());
-        model.yRot = angle*mult;
+        model.yRot = angle * mult;
     }
 
     @Override
     public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green,
-                       float blue, float alpha) {
+                               float blue, float alpha) {
         matrixStackIn.pushPose();
 
         this.standPlate.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
@@ -93,15 +93,14 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
     @Override
     public void prepareMobModel(T entityIn, float limbSwing, float limbSwingAmount, float partialTick) {
         super.prepareMobModel(entityIn, limbSwing, limbSwingAmount, partialTick);
-        float phase = Mth.lerp(partialTick,entityIn.prevShakeAmount,entityIn.shakeAmount);
-        float swing = Mth.lerp(partialTick,entityIn.prevLimbSwing,entityIn.animationPosition);
+        float phase = Mth.lerp(partialTick, entityIn.prevShakeAmount, entityIn.shakeAmount);
+        float swing = Mth.lerp(partialTick, entityIn.prevLimbSwing, entityIn.animationPosition);
         float shake = Math.min((float) (swing * Configs.cached.ANIMATION_INTENSITY), 40f);
 
         if (shake > 0) {
             this.r = (float) -(Mth.sin(phase) * Math.PI / 100f * shake);
-            this.r2 = (float) (Mth.sin(phase) * Math.PI / 20f * Math.min(shake,1));
-        }
-        else{
+            this.r2 = (float) (Mth.sin(phase) * Math.PI / 20f * Math.min(shake, 1));
+        } else {
             this.r = 0;
             this.r2 = 0;
         }
@@ -110,7 +109,7 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
 
     @Override
     public void setupAnim(TargetDummyEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
-                                  float headPitch) {
+                          float headPitch) {
 
 
         // un-rotate the stand plate, so it's aligned to the block grid
@@ -123,14 +122,14 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
 
         float yOffsetIn = -1;
 
-        float xangle = r/2;
+        float xangle = r / 2;
 
 
         this.leftLeg.setPos(0, 12.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.leftLeg, 0, 24 + yOffsetIn, 0, xangle);
         //for mod support
         this.rightLeg.setPos(0, 12.0F + yOffsetIn, 0.0F);
-        this.rotateModelX(this.rightLeg, 0.01f, 24 + yOffsetIn+0.01f, 0.01f, xangle);
+        this.rotateModelX(this.rightLeg, 0.01f, 24 + yOffsetIn + 0.01f, 0.01f, xangle);
 
         this.body.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.body, 0, 24 + yOffsetIn, 0, xangle);
@@ -143,12 +142,10 @@ public class TargetDummyModel<T extends TargetDummyEntity> extends HumanoidModel
         this.rotateModelY(this.leftArm, 0, 24 + yOffsetIn, 0, xangle, 1);
 
 
-
         this.head.setPos(0.0F, 0.0F + yOffsetIn, 0.0F);
         this.rotateModelX(this.head, 0, 24 + yOffsetIn, 0, xangle);
         //mod support
         this.hat.copyFrom(this.head);
-
 
 
         this.head.xRot = -r; //-r

@@ -2,10 +2,8 @@
 package net.mehvahdjukaar.dummmmmmy.common;
 
 import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
-import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.awt.*;
@@ -43,7 +41,7 @@ public class Configs {
 
     public static ForgeConfigSpec.DoubleValue ANIMATION_INTENSITY;
     public static ForgeConfigSpec.BooleanValue SHOW_HEARTHS;
-    public static ForgeConfigSpec.BooleanValue DYNAMIC_DPS;
+    public static ForgeConfigSpec.EnumValue<DpsMode> DYNAMIC_DPS;
     public static ForgeConfigSpec.ConfigValue<SkinType> SKIN;
 
     public static ForgeConfigSpec.ConfigValue<String> DAMAGE_GENERIC;
@@ -61,6 +59,7 @@ public class Configs {
 
     public static ForgeConfigSpec SERVER_CONFIG;
 
+    public static ForgeConfigSpec.BooleanValue DAMAGE_NUMBERS;
     public static ForgeConfigSpec.BooleanValue DAMAGE_EQUIPMENT;
     public static ForgeConfigSpec.IntValue RADIUS;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> WHITELIST;
@@ -72,7 +71,8 @@ public class Configs {
         builder.comment("lots of cosmetic stuff in here").push("visuals");
         ANIMATION_INTENSITY = builder.comment("How much the dummy swings in degrees with respect to the damage dealt. default=0.75").defineInRange("animationIntensity", 0.75, 0.0, 2.0);
         SHOW_HEARTHS = builder.comment("Show hearths instead of damage dealt? (1 hearth = two damage)").define("showHearths", false);
-        DYNAMIC_DPS = builder.comment("Does dps message update dynamically or will it only appear after each parse? ").define("dynamicDPS", true);
+        DYNAMIC_DPS = builder.comment("Does dps message update dynamically or will it only appear after each parse? ")
+                .defineEnum("DPS_mode", DpsMode.DYNAMIC);
 
 
         SKIN = builder.comment("Skin used by the dummy").define("texture", SkinType.DEFAULT);
@@ -108,6 +108,8 @@ public class Configs {
         RADIUS = serverBuilder.comment("Scaring radius").defineInRange("scare_radius", 12, 0, 100);
 
         serverBuilder.pop();
+        DAMAGE_NUMBERS = serverBuilder.comment("Enable and disable damage numbers")
+                .define("damage_numbers", true);
 
         DAMAGE_EQUIPMENT = serverBuilder.comment("Enable this to prevent your equipment from getting damaged when attacking the dummy")
                 .define("disable_equipment_damage", true);
@@ -141,7 +143,7 @@ public class Configs {
         public static List<? extends String> BLACKLIST;
         public static int RADIUS;
         public static boolean DAMAGE_EQUIPMENT;
-
+        public static boolean DAMAGE_NUMBERS;
 
         public static void refresh() {
 
@@ -149,7 +151,7 @@ public class Configs {
             WHITELIST = Configs.WHITELIST.get();
             BLACKLIST = Configs.BLACKLIST.get();
             DAMAGE_EQUIPMENT = Configs.DAMAGE_EQUIPMENT.get();
-
+            DAMAGE_NUMBERS = Configs.DAMAGE_NUMBERS.get();
         }
     }
 
@@ -157,7 +159,7 @@ public class Configs {
     public static class cached {
         public static double ANIMATION_INTENSITY;
         public static boolean SHOW_HEARTHS;
-        public static boolean DYNAMIC_DPS;
+        public static DpsMode DYNAMIC_DPS;
         public static SkinType SKIN;
 
         public static int DAMAGE_GENERIC;
@@ -173,10 +175,17 @@ public class Configs {
         public static int DAMAGE_CACTUS;
         public static int DAMAGE_TRUE;
 
+
+
         public static void refresh() {
             ANIMATION_INTENSITY = Configs.ANIMATION_INTENSITY.get();
             SHOW_HEARTHS = Configs.SHOW_HEARTHS.get();
-            DYNAMIC_DPS = Configs.DYNAMIC_DPS.get();
+            try {
+                DYNAMIC_DPS = Configs.DYNAMIC_DPS.get();
+            }
+            catch (Exception e){
+                DYNAMIC_DPS = DpsMode.DYNAMIC;
+            }
             try {
                 SKIN = Configs.SKIN.get();
             }catch (Exception e){
@@ -195,6 +204,8 @@ public class Configs {
             DAMAGE_LIGHTNING = parseHex(Configs.DAMAGE_LIGHTNING.get());
             DAMAGE_CACTUS = parseHex(Configs.DAMAGE_CACTUS.get());
             DAMAGE_TRUE = parseHex(Configs.DAMAGE_TRUE.get());
+
+
         }
     }
 
@@ -217,5 +228,10 @@ public class Configs {
         }
     }
 
+    public enum DpsMode{
+        DYNAMIC,
+        STATIC,
+        OFF
+    }
 
 }

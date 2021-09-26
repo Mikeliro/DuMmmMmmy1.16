@@ -5,9 +5,10 @@ package net.mehvahdjukaar.dummmmmmy;
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.setup.ClientHandler;
 import net.mehvahdjukaar.dummmmmmy.setup.ModSetup;
-import net.mehvahdjukaar.dummmmmmy.setup.Registry;
+import net.mehvahdjukaar.dummmmmmy.setup.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -37,7 +38,7 @@ public class DummmmmmyMod {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
 
-		Registry.init(bus);
+		ModRegistry.init(bus);
 
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.register(ClientHandler.class));
 

@@ -3,62 +3,50 @@ package net.mehvahdjukaar.dummmmmmy.entity;
 
 import net.mehvahdjukaar.dummmmmmy.common.Configs;
 import net.mehvahdjukaar.dummmmmmy.common.NetworkHandler;
-import net.mehvahdjukaar.dummmmmmy.setup.Registry;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.FriendlyByteBuf;
+import net.mehvahdjukaar.dummmmmmy.setup.ModRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.util.*;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.extensions.IForgeEntity;
-import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fmllegacy.network.FMLPlayMessages;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
-import net.minecraftforge.registries.ForgeRegistries;
-
-import java.awt.*;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
-import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.extensions.IForgeEntity;
+import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fmllegacy.network.FMLPlayMessages;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData, IForgeEntity {
 
@@ -83,7 +71,7 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
     private final NonNullList<ItemStack> lastArmorItem = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public TargetDummyEntity(FMLPlayMessages.SpawnEntity packet, Level world) {
-        this(Registry.TARGET_DUMMY.get(), world);
+        this(ModRegistry.TARGET_DUMMY.get(), world);
     }
 
     public TargetDummyEntity(EntityType<TargetDummyEntity> type, Level world) {
@@ -91,7 +79,7 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
     }
 
     public TargetDummyEntity(Level world) {
-        this(Registry.TARGET_DUMMY.get(), world);
+        this(ModRegistry.TARGET_DUMMY.get(), world);
         xpReward = 0;
         //so can take all sorts of damage
         //setNoAI(true);
@@ -335,7 +323,7 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
         if (!this.level.isClientSide) {
             if (drops) {
                 this.dropEquipment();
-                this.spawnAtLocation(Registry.DUMMY_ITEM.get(), 1);
+                this.spawnAtLocation(ModRegistry.DUMMY_ITEM.get(), 1);
             }
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getDeathSound(),
                     this.getSoundSource(), 1.0F, 1.0F);
@@ -354,7 +342,7 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
 
     @Override
     public ItemStack getPickedResult(HitResult target) {
-        return new ItemStack(Registry.DUMMY_ITEM.get());
+        return new ItemStack(ModRegistry.DUMMY_ITEM.get());
     }
 
     @Override
@@ -485,10 +473,12 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
         //TODO: replace with entity attributes
         NetworkHandler.sendToAllTracking(this, (ServerLevel) this.level, new NetworkHandler.PacketDamageNumber(this.getId(), damage, this.animationPosition));
 
-        // damage numebrssss
-        DummyNumberEntity number = new DummyNumberEntity(damage, type, this.damageNumberPos++, this.level);
-        number.moveTo(this.getX(), this.getY() + 1, this.getZ(), 0.0F, 0.0F);
-        this.level.addFreshEntity(number);
+        if(Configs.cachedServer.DAMAGE_NUMBERS) {
+            // damage numebrssss
+            DummyNumberEntity number = new DummyNumberEntity(damage, type, this.damageNumberPos++, this.level);
+            number.moveTo(this.getX(), this.getY() + 1, this.getZ(), 0.0F, 0.0F);
+            this.level.addFreshEntity(number);
+        }
 
         this.damageTaken += damage;
         if (firstDamageTick == 0) {
@@ -539,19 +529,6 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
         this.level.getProfiler().pop();
         //end living tick stuff
 
-        /*
-        this.level.getProfiler().push("rest");
-        try {
-            this.checkInsideBlocks();
-        } catch (Throwable throwable) {
-            CrashReport crashreport = CrashReport.forThrowable(throwable, "Checking entity block collision");
-            CrashReportCategory crashreportcategory = crashreport.addCategory("Entity being checked for collision");
-            this.fillCrashReportCategory(crashreportcategory);
-            throw new ReportedException(crashreport);
-        }
-        this.level.getProfiler().pop();
-        */
-
 
         if (this.level.isClientSide) {
             //set to 0 to disable red glow that happens when hurt
@@ -571,28 +548,30 @@ public class TargetDummyEntity extends Mob implements IEntityAdditionalSpawnData
 
         } else {
 
-            //here is for visially show dps on status mesasge
+            //here is for visually show dps on status message
             if (this.damageTaken > 0) {
                 // DPS!
                 //&& this.ticksExisted - lastDamageTick >60 for static
 
                 //am i being attacked?
 
-                boolean isdynamic = Configs.cached.DYNAMIC_DPS;
-                boolean flag = isdynamic ? (this.tickCount == lastDamageTick + 1) : (this.tickCount - lastDamageTick) > 60;
+                Configs.DpsMode dpsMode = Configs.cached.DYNAMIC_DPS;
+                if (dpsMode != Configs.DpsMode.OFF) {
+                    boolean flag = dpsMode == Configs.DpsMode.DYNAMIC ? (this.tickCount == lastDamageTick + 1) :
+                            (this.tickCount - lastDamageTick) > 60;
 
+                    //only show damage after second damage tick
+                    if (flag && firstDamageTick < lastDamageTick) {
 
-                //only show damage after second damage tick
-                if (flag && firstDamageTick < lastDamageTick) {
+                        // it's not actual DPS but "damage per tick scaled to seconds".. but meh.
+                        float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
+                        float dps = damageTaken / seconds;
+                        for (ServerPlayer p : this.currentlyAttacking) {
+                            if (p.distanceTo(this) < 64)
+                                p.displayClientMessage(new TranslatableComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
+                        }
 
-                    // it's not actual DPS but "damage per tick scaled to seconds".. but meh.
-                    float seconds = (lastDamageTick - firstDamageTick) / 20f + 1;
-                    float dps = damageTaken / seconds;
-                    for (ServerPlayer p : this.currentlyAttacking) {
-                        if (p.distanceTo(this) < 64)
-                            p.displayClientMessage(new TranslatableComponent("message.dummmmmmy.dps", new DecimalFormat("#.##").format(dps)), true);
                     }
-
                 }
                 //out of combat. reset variables
                 if (this.tickCount - lastDamageTick > 60) {

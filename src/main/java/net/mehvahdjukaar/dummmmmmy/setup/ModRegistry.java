@@ -4,17 +4,17 @@ import net.mehvahdjukaar.dummmmmmy.DummmmmmyMod;
 import net.mehvahdjukaar.dummmmmmy.entity.DummyNumberEntity;
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
 import net.mehvahdjukaar.dummmmmmy.item.TargetDummyItem;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @SuppressWarnings("unused")
-public class Registry {
+public class ModRegistry {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, DummmmmmyMod.MOD_ID);
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, DummmmmmyMod.MOD_ID);

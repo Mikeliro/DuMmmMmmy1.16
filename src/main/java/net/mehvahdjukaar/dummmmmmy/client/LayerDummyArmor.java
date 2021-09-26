@@ -1,10 +1,9 @@
 package net.mehvahdjukaar.dummmmmmy.client;
 
 import net.mehvahdjukaar.dummmmmmy.entity.TargetDummyEntity;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class LayerDummyArmor<T extends TargetDummyEntity, M extends HumanoidModel<T>, A extends TargetDummyModel<T>> extends HumanoidArmorLayer<T, M, A> {
